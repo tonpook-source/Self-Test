@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบทดสอบออนไลน์: ระบบของคอมพิวเตอร์ (Self-Assessment)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Noto+Sans+Thai:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans Thai', 'Inter', sans-serif;
+            background-color: #f5f5f5; /* Light gray background */
+        }
+        .card {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        /* --- Bright Theme Colors --- */
+        .header-color {
+            color: #00b894; /* Turquoise Green for key text */
+        }
+        .button-color {
+            background-color: #0984e3; /* Bright Blue for buttons */
+        }
+        .button-color:hover {
+            background-color: #74b9ff; /* Light Blue hover */
+        }
+        .option-button {
+            transition: all 0.2s;
+            /* Ensure sufficient touch target size on mobile */
+            min-height: 48px; 
+            display: flex; /* Ensure content is centered if height increases */
+            align-items: center;
+        }
+        .option-button:hover {
+            background-color: #e5e7eb;
+        }
+        .option-selected {
+            background-color: #6c5ce7; /* Violet/Purple for selection */
+            color: white;
+            border-color: #4a408c;
+        }
+        /* --- END Bright Theme Colors --- */
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        /* Custom modal styles */
+        .modal {
+            max-width: 90%;
+            width: 400px;
+        }
+
+        /* Ensure input fields and buttons are easily tappable on mobile */
+        input[type="text"], input[type="number"], button {
+            touch-action: manipulation;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Overlay (Kept for initial loading visualization) -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="flex flex-col items-center">
+            <svg class="animate-spin -ml-1 mr-3 h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="mt-4 text-gray-700 font-medium" id="loading-message">กำลังโหลด...</p>
+        </div>
+    </div>
+
+    <!-- Main Application Container: Max width on large screens, full width for mobile -->
+    <div class="min-h-screen flex flex-col items-center p-4">
+        
+        <!-- Header -->
+        <header class="w-full max-w-2xl text-center py-6">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800">ระบบแบบทดสอบออนไลน์</h1>
+            <p class="text-sm text-gray-500 mt-1">ครูประจำรายวิชา ครูธนพล อ่อนพุก</p>
+            <p class="text-lg header-color font-semibold mt-1">(Self-Assessment: แสดงผลคะแนนทันที)</p>
+        </header>
+
+        <!-- Main Content Area: uses max-w-2xl for desktop, full width for mobile -->
+        <main id="app-container" class="w-full max-w-2xl bg-white p-6 md:p-8 rounded-xl card mb-8">
+            <!-- Content will be injected here (Login, Quiz, Result) -->
+        </main>
+
+        <!-- Custom Confirmation Modal (Replaces alert/confirm) -->
+        <div id="modal-confirm" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden justify-center items-center z-50">
+            <div class="modal bg-white p-6 rounded-xl card transform transition-all duration-300">
+                <h3 id="modal-title" class="text-xl font-bold mb-4 text-gray-800">ยืนยันการทำรายการ</h3>
+                <p id="modal-body" class="mb-6 text-gray-600">คุณต้องการส่งคำตอบหรือไม่? หลังจากส่งแล้วจะไม่สามารถแก้ไขได้</p>
+                <div class="flex justify-end space-x-3">
+                    <button onclick="hideModal('modal-confirm')" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition duration-150">ยกเลิก</button>
+                    <button id="modal-confirm-btn" class="px-4 py-2 button-color text-white rounded-lg hover:bg-blue-700 font-medium transition duration-150">ยืนยัน</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Application Script -->
+    <script type="module">
+        
+        // --- QUIZ DATA ---
+        const quizData = [
+            {
+                question: "1. ข้อใดคือองค์ประกอบหลัก 5 ประการของระบบคอมพิวเตอร์",
+                options: ["ฮาร์ดแวร์, ซอฟต์แวร์, โปรแกรม, เครือข่าย, บุคลากร", "ฮาร์ดแวร์, ซอฟต์แวร์, พีเพิลแวร์, ข้อมูลสารสนเทศ, กระบวนการทำงาน", "หน่วยรับข้อมูล, หน่วยประมวลผลกลาง, หน่วยความจำ, หน่วยแสดงผล, บุคลากร", "ระบบปฏิบัติการ, โปรแกรมประยุกต์, ตัวแปลภาษา, ฐานข้อมูล, ผู้ใช้"],
+                correctAnswerIndex: 1
+            },
+            {
+                question: "2. อุปกรณ์ใดที่จัดอยู่ในประเภทหน่วยรับข้อมูล (Input Unit) ตามการแบ่งองค์ประกอบฮาร์ดแวร์",
+                options: ["จอภาพ (Monitor)", "เครื่องพิมพ์ (Printer)", "เมาส์ (Mouse)", "ฮาร์ดดิสก์ (Hard Disk)"],
+                correctAnswerIndex: 2
+            },
+            {
+                question: "3. หน่วยความจำประเภทใดที่ข้อมูลจะหายไปทันทีเมื่อปิดเครื่องหรือเกิดไฟดับระหว่างใช้งาน",
+                options: ["ROM (Read Only Memory)", "RAM (Random Access Memory)", "หน่วยความจำสำรอง (Secondary Memory)", "แคช (Cache Memory)"],
+                correctAnswerIndex: 1
+            },
+            {
+                question: "4. Microsoft Word จัดเป็นซอฟต์แวร์ประเภทใดในระบบคอมพิวเตอร์",
+                options: ["ซอฟต์แวร์ระบบ (System Software)", "ซอฟต์แวร์ระบบปฏิบัติการ (Operating System)", "ซอฟต์แวร์ประยุกต์สำหรับงานเฉพาะด้าน (Special Purpose Software)", "ซอฟต์แวร์ประยุกต์สำหรับงานทั่วไป (General Purpose Software)"],
+                correctAnswerIndex: 3
+            },
+            {
+                question: "5. หน้าที่หลักของโปรแกรมระบบปฏิบัติการ (Operating System) คือข้อใด",
+                options: ["ทำการคำนวณและเปรียบเทียบข้อมูลตามที่ได้รับคำสั่ง", "ควบคุมและติดต่อกับอุปกรณ์ต่าง ๆ ของเครื่องคอมพิวเตอร์ และจัดการระบบหน่วยความจำ", "แปลภาษาที่มนุษย์เข้าใจให้เป็นภาษาที่เครื่องเข้าใจ", "อำนวยความสะดวกในการสำรองข้อมูลและจัดระเบียบของข้อมูลในฮาร์ดดิสก์"],
+                correctAnswerIndex: 1
+            },
+            {
+                question: "6. ตัวแปลภาษาแบบใดที่ใช้หลักการแปลทีละประโยคคำสั่ง แล้วทำงานตามประโยคคำสั่งนั้น ทำให้การแก้ไขโปรแกรมทำได้ง่ายและรวดเร็ว",
+                options: ["คอมไพเลอร์ (Compiler)", "อินเตอร์พรีเตอร์ (Interpreter)", "แอสเซมเบลอ (Assembler)", "โปรแกรมอรรถประโยชน์ (Utility Program)"],
+                correctAnswerIndex: 1
+            },
+            {
+                question: "7. บุคลากรประเภทใดที่ทำหน้าที่เป็นสื่อกลางระหว่างผู้ใช้ระบบและนักเขียนโปรแกรม โดยศึกษาและรวบรวมความต้องการของผู้ใช้",
+                options: ["โปรแกรมเมอร์ (Programmer)", "นักวิเคราะห์และออกแบบระบบ (System Analyst and Designer: SA)", "ผู้ปฏิบัติการ (Operator)", "ผู้บริหารฐานข้อมูล (Database Administrator: DBA)"],
+                correctAnswerIndex: 1
+            },
+            {
+                question: "8. ข้อใดคือตัวอย่างของ 'สารสนเทศ' (Information) ที่ได้จากการประมวลผลข้อมูล",
+                options: ["คะแนนสอบดิบของนักเรียนแต่ละคน", "ตัวเลขราคาขายของหนังสือในร้านหนังสือ", "เกรดเฉลี่ยสะสม (GPA) ของนักเรียนทั้งห้อง", "อายุของพนักงานแต่ละคนในบริษัท"],
+                correctAnswerIndex: 2
+            },
+            {
+                question: "9. หน่วยใดในระบบคอมพิวเตอร์ที่ทำหน้าที่ในการคำนวณและเปรียบเทียบข้อมูล ตลอดจนดำเนินการควบคุมการปฏิบัติการให้เป็นไปตามที่ได้รับคำสั่ง",
+                options: ["หน่วยรับข้อมูล (Input Unit)", "หน่วยประมวลผลกลาง (CPU)", "หน่วยความจำหลัก (Main Memory)", "หน่วยแสดงผล (Output Unit)"],
+                correctAnswerIndex: 1
+            },
+            {
+                question: "10. หลักการทำงานเบื้องต้นของระบบคอมพิวเตอร์ที่ถูกต้องตามลำดับคือข้อใด",
+                options: ["หน่วยประมวลผลกลาง → หน่วยรับข้อมูล → หน่วยแสดงผล", "หน่วยรับข้อมูล → หน่วยประมวลผลกลาง → หน่วยแสดงผล", "หน่วยแสดงผล → หน่วยความจำ → หน่วยประมวลผลกลาง", "หน่วยความจำ → หน่วยรับข้อมูล → หน่วยแสดงผล"],
+                correctAnswerIndex: 1
+            }
+        ];
+
+        // --- QUIZ CONSTANTS ---
+        const thaiOptions = ['ก', 'ข', 'ค', 'ง']; // ตัวเลือก ก, ข, ค, ง
+        const TIME_LIMIT_SECONDS = quizData.length * 60; // 10 ข้อ * 60 วินาที = 600 วินาที (10 นาที)
+
+        // --- QUIZ STATE ---
+        let currentQuestionIndex = 0;
+        let selectedAnswers = new Array(quizData.length).fill(null);
+        let studentName = '';
+        let studentId = ''; // Renamed internally to hold student number
+        let timeLeft = TIME_LIMIT_SECONDS;
+        let timerInterval = null;
+
+
+        // --- APPLICATION FLOW ---
+
+        window.onload = () => {
+            // No Firebase initialization needed
+            hideLoading(); 
+            window.showLoginView();
+        }
+
+        // --- TIMER FUNCTIONS ---
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const display = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            const timerElement = document.getElementById('timer-display');
+            if (timerElement) {
+                timerElement.textContent = display;
+                // Highlight red and pulse when less than 1 minute remains
+                if (timeLeft <= 60) {
+                    timerElement.classList.add('animate-pulse', 'text-red-600');
+                    timerElement.classList.remove('text-orange-500');
+                } else if (timeLeft <= 120) {
+                    timerElement.classList.add('text-orange-500');
+                    timerElement.classList.remove('text-red-600', 'animate-pulse');
+                } else {
+                    timerElement.classList.remove('text-red-600', 'animate-pulse', 'text-orange-500');
+                    timerElement.classList.add('text-gray-800');
+                }
+            }
+        }
+
+        function startTimer() {
+            window.stopTimer(); // Clear any existing timer
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                window.updateTimerDisplay();
+
+                if (timeLeft <= 0) {
+                    window.stopTimer();
+                    // Time's up, automatically submit
+                    window.showModal('หมดเวลาทำข้อสอบ', 'เวลาในการทำข้อสอบหมดลงแล้ว ระบบจะส่งคำตอบที่คุณเลือกไว้ทันที', false);
+                    setTimeout(() => { 
+                        window.hideModal('modal-confirm');
+                        window.submitQuiz(true); 
+                    }, 2000); // Give 2 seconds to read the message before submitting
+                }
+            }, 1000);
+        }
+
+        window.stopTimer = function() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+        window.updateTimerDisplay = updateTimerDisplay;
+        window.startTimer = startTimer; // Attach to window for global access
+
+
+        // --- UI MANAGEMENT ---
+
+        function showLoading(message) {
+            document.getElementById('loading-message').textContent = message;
+            document.getElementById('loading-overlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        function clearAppContainer() {
+            document.getElementById('app-container').innerHTML = '';
+        }
+
+        // --- LOGIN VIEW ---
+
+        window.showLoginView = function() {
+            window.stopTimer(); // Ensure timer is stopped if returning to login screen
+            clearAppContainer();
+            const html = `
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-700 text-center">เข้าสู่ระบบแบบทดสอบ</h2>
+                    <div class="space-y-4">
+                        <label class="block text-sm font-medium text-gray-700" for="name">ชื่อ-นามสกุล:</label>
+                        <input type="text" id="student-name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="ระบุชื่อ-นามสกุล" required>
+                    </div>
+                    <div class="space-y-4">
+                        <label class="block text-sm font-medium text-gray-700" for="id">เลขที่:</label>
+                        <input type="number" id="student-id" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="ระบุเลขที่" required>
+                    </div>
+                    <button onclick="startQuiz()" class="w-full py-3 mt-4 button-color text-white rounded-lg font-bold text-lg hover:bg-orange-700 transition duration-150 shadow-md">
+                        เริ่มทำแบบทดสอบ (10 ข้อ)
+                    </button>
+                    <p class="text-xs text-gray-400 text-center mt-4">(ระบบจะไม่บันทึกผลคะแนน)</p>
+                </div>
+            `;
+            document.getElementById('app-container').innerHTML = html;
+        }
+
+        window.startQuiz = function() {
+            studentName = document.getElementById('student-name').value.trim();
+            studentId = document.getElementById('student-id').value.trim(); // Now holds the student number
+
+            if (!studentName || !studentId) {
+                window.showModal('กรุณากรอกข้อมูลให้ครบถ้วน', 'ต้องระบุ ชื่อ-นามสกุล และ เลขที่ เพื่อทำแบบทดสอบ', false);
+                return;
+            }
+
+            // Reset quiz state and start timer
+            currentQuestionIndex = 0;
+            selectedAnswers = new Array(quizData.length).fill(null);
+            timeLeft = TIME_LIMIT_SECONDS;
+            window.startTimer();
+            window.showQuizView();
+        }
+
+        // --- QUIZ VIEW ---
+
+        function showQuizView() {
+            clearAppContainer();
+            const q = quizData[currentQuestionIndex];
+            
+            const optionsHtml = q.options.map((option, index) => {
+                const isSelected = selectedAnswers[currentQuestionIndex] === index;
+                // Ensure option-selected uses the new bright color theme
+                const selectedClass = isSelected ? 'option-selected' : 'bg-gray-50 text-gray-700 hover:bg-gray-100';
+                
+                const optionPrefix = thaiOptions[index] ? thaiOptions[index] : ''; 
+
+                return `
+                    <button 
+                        data-index="${index}"
+                        onclick="selectAnswer(${index})"
+                        class="option-button w-full text-left p-4 border border-gray-300 rounded-xl font-medium ${selectedClass}">
+                        ${optionPrefix}. ${option} 
+                    </button>
+                `;
+            }).join('');
+
+            const progress = `${currentQuestionIndex + 1} / ${quizData.length}`;
+            const buttonText = currentQuestionIndex === quizData.length - 1 ? 'ส่งคำตอบ' : 'ข้อถัดไป';
+            const buttonAction = currentQuestionIndex === quizData.length - 1 ? 'confirmSubmission()' : 'nextQuestion()';
+            const backButtonClass = currentQuestionIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200';
+
+            const html = `
+                <div class="space-y-6">
+                    <div class="text-center">
+                        <p class="text-sm font-semibold header-color">${studentName} (เลขที่: ${studentId})</p>
+                        <p class="text-xl font-bold text-gray-800 mt-1">คำถามที่ ${progress}</p>
+                        <div class="h-1 bg-gray-200 rounded-full mt-3">
+                            <div class="button-color h-1 rounded-full" style="width: ${((currentQuestionIndex + 1) / quizData.length) * 100}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center bg-yellow-50 border border-yellow-200 p-3 rounded-xl font-bold text-gray-800 mt-4 shadow-sm">
+                        <p>เวลาที่เหลือ (10 นาที):</p>
+                        <div id="timer-display" class="text-2xl text-gray-800">--:--</div>
+                    </div>
+
+                    <div id="question-area" class="bg-white p-5 border border-gray-200 rounded-xl">
+                        <p class="text-lg font-semibold text-gray-900">${q.question}</p>
+                    </div>
+
+                    <div id="options-area" class="space-y-3">
+                        ${optionsHtml}
+                    </div>
+
+                    <div class="flex justify-between pt-4">
+                        <button onclick="prevQuestion()" class="px-5 py-3 bg-gray-100 text-gray-600 rounded-lg font-semibold transition duration-150 ${backButtonClass}">
+                            ย้อนกลับ
+                        </button>
+                        <button onclick="${buttonAction}" class="px-5 py-3 button-color text-white rounded-lg font-bold transition duration-150 hover:bg-blue-700 shadow-md">
+                            ${buttonText}
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('app-container').innerHTML = html;
+            window.updateTimerDisplay(); // Initial display update
+        }
+        
+        window.showQuizView = showQuizView;
+
+        window.selectAnswer = function(index) {
+            selectedAnswers[currentQuestionIndex] = index;
+            window.showQuizView(); 
+        }
+
+        window.prevQuestion = function() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                window.showQuizView();
+            }
+        }
+
+        window.nextQuestion = function() {
+            if (selectedAnswers[currentQuestionIndex] === null) {
+                window.showModal('ยังไม่ได้เลือกคำตอบ', 'กรุณาเลือกคำตอบสำหรับคำถามนี้ก่อนไปต่อ', false);
+                return;
+            }
+            if (currentQuestionIndex < quizData.length - 1) {
+                currentQuestionIndex++;
+                window.showQuizView();
+            }
+        }
+
+        window.confirmSubmission = function() {
+            if (selectedAnswers.includes(null)) {
+                 window.showModal('ยังตอบไม่ครบ', `คุณยังไม่ได้ตอบคำถามอีก ${selectedAnswers.filter(a => a === null).length} ข้อ`, false);
+                return;
+            }
+            window.showModal('ยืนยันการส่งคำตอบ', 'คุณต้องการส่งคำตอบหรือไม่? หลังจากส่งแล้วจะไม่สามารถแก้ไขได้', true, window.submitQuiz);
+        }
+
+        // --- SUBMIT QUIZ (NO DB) ---
+
+        window.submitQuiz = function(isForced = false) {
+            window.stopTimer(); // STOP THE TIMER BEFORE SUBMISSION
+            window.hideModal('modal-confirm');
+            
+            let score = 0;
+            quizData.forEach((q, index) => {
+                if (selectedAnswers[index] === q.correctAnswerIndex) {
+                    score++;
+                }
+            });
+
+            const totalScore = score;
+            const message = isForced ? 'หมดเวลา: ส่งคำตอบอัตโนมัติ' : 'ผลการทดสอบของคุณ';
+
+            // Directly show the result view
+            window.showResultView(totalScore, quizData.length, message);
+        }
+
+        // --- RESULT VIEW ---
+
+        window.showResultView = function(score, total, message = 'ผลการทดสอบของคุณ', color = 'text-green-600') {
+            clearAppContainer();
+            const percentage = ((score / total) * 100).toFixed(0);
+
+            const html = `
+                <div class="text-center space-y-6 py-6">
+                    <h2 class="text-3xl font-extrabold text-gray-800">${message}</h2>
+                    <p class="text-lg text-gray-600">สวัสดีคุณ ${studentName} (เลขที่: ${studentId})</p>
+                    
+                    <div class="p-8 rounded-xl inline-block shadow-lg" style="background-color: #fffbeb; border: 3px solid #00b894">
+                        <p class="text-6xl font-black header-color">${score}</p>
+                        <p class="text-xl font-semibold text-gray-600 mt-2">คะแนน (จาก ${total} ข้อ)</p>
+                    </div>
+
+                    <p class="text-2xl font-bold header-color">${percentage}%</p>
+                    
+                    <button onclick="showLoginView()" class="w-full py-3 mt-8 button-color text-white rounded-lg font-bold text-lg hover:bg-blue-700 transition duration-150 shadow-md">
+                        ทำแบบทดสอบใหม่
+                    </button>
+                </div>
+            `;
+            document.getElementById('app-container').innerHTML = html;
+        }
+
+        // --- Custom Modal Functions (Attached to window for full global access) ---
+        
+        window.showModal = function(title, body, isConfirm, callback = null) {
+            const modal = document.getElementById('modal-confirm');
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-body').textContent = body;
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+            
+            // Adjust button style for confirmation dialog
+            confirmBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            confirmBtn.classList.add('button-color', 'hover:bg-blue-700'); // Use new button color
+            
+            if (isConfirm) {
+                confirmBtn.classList.remove('hidden');
+                confirmBtn.onclick = callback;
+            } else {
+                confirmBtn.classList.add('hidden');
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        window.hideModal = function(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+    </script>
+</body>
+</html>
