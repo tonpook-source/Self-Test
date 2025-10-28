@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบทดสอบออนไลน์: ระบบปฏิบัติการ DOS (Disk Operating System)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Noto+Sans+Thai:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans Thai', 'Inter', sans-serif;
+            background-color: #f5f5f5; /* Light gray background */
+        }
+        .card {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        /* --- RED BRIGHT Theme Colors --- */
+        .header-color {
+            color: #C0392B; /* Strong Red/Maroon for key text */
+        }
+        .button-color {
+            background-color: #E74C3C; /* Standard Red for buttons */
+        }
+        .button-color:hover {
+            background-color: #DC3545; /* Slightly Darker Red hover */
+        }
+        .option-button {
+            transition: all 0.2s;
+            /* Ensure sufficient touch target size on mobile */
+            min-height: 48px; 
+            display: flex; /* Ensure content is centered if height increases */
+            align-items: center;
+        }
+        .option-button:hover {
+            background-color: #fcebeb; /* Very light red hover */
+        }
+        .option-selected {
+            background-color: #8B0000; /* Dark Red/Maroon for selection */
+            color: white;
+            border-color: #5d0000;
+        }
+        /* --- END Bright Theme Colors --- */
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        /* Custom modal styles */
+        .modal {
+            max-width: 90%;
+            width: 400px;
+        }
+
+        /* Ensure input fields and buttons are easily tappable on mobile */
+        input[type="text"], input[type="number"], button {
+            touch-action: manipulation;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Overlay (Kept for initial loading visualization) -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="flex flex-col items-center">
+            <svg class="animate-spin -ml-1 mr-3 h-10 w-10 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="mt-4 text-gray-700 font-medium" id="loading-message">กำลังโหลด...</p>
+        </div>
+    </div>
+
+    <!-- Main Application Container: Max width on large screens, full width for mobile -->
+    <div class="min-h-screen flex flex-col items-center p-4">
+        
+        <!-- Header -->
+        <header class="w-full max-w-2xl text-center py-6">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800">ระบบแบบทดสอบออนไลน์</h1>
+            <p class="text-xl header-color font-semibold mt-1">เรื่อง: ระบบปฏิบัติการ DOS (Disk Operating System)</p> <!-- แก้ไขแล้ว -->
+            <p class="text-sm text-gray-500 mt-1">ครูประจำรายวิชา ครูธนพล อ่อนพุก</p>
+            <p class="text-lg header-color font-semibold mt-1">(Self-Assessment: แสดงผลคะแนนทันที)</p>
+        </header>
+
+        <!-- Main Content Area: uses max-w-2xl for desktop, full width for mobile -->
+        <main id="app-container" class="w-full max-w-2xl bg-white p-6 md:p-8 rounded-xl card mb-8">
+            <!-- Content will be injected here (Login, Quiz, Result) -->
+        </main>
+
+        <!-- Custom Confirmation Modal (Replaces alert/confirm) -->
+        <div id="modal-confirm" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden justify-center items-center z-50">
+            <div class="modal bg-white p-6 rounded-xl card transform transition-all duration-300">
+                <h3 id="modal-title" class="text-xl font-bold mb-4 text-gray-800">ยืนยันการทำรายการ</h3>
+                <p id="modal-body" class="mb-6 text-gray-600">คุณต้องการส่งคำตอบหรือไม่? หลังจากส่งแล้วจะไม่สามารถแก้ไขได้</p>
+                <div class="flex justify-end space-x-3">
+                    <button onclick="hideModal('modal-confirm')" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition duration-150">ยกเลิก</button>
+                    <button id="modal-confirm-btn" class="px-4 py-2 button-color text-white rounded-lg hover:bg-red-700 font-medium transition duration-150">ยืนยัน</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Application Script -->
+    <script type="module">
+        
+        // --- QUIZ DATA (Updated based on "เนื้อหาสัปดาห์ที่03(ระบบปฎิบัติการDos).pdf") ---
+        const quizData = [
+            {
+                question: "1. DOS (Disk Operating System) เป็นระบบปฏิบัติการในรูปแบบใดที่แตกต่างจาก Windows?",
+                options: ["Graphics Mode (ระบบรูปภาพ)", "Text Mode (รูปแบบของตัวอักษร)", "Network Mode (ระบบเครือข่าย)", "Batch Mode (ระบบงานชุด)"],
+                correctAnswerIndex: 1
+            },
+            {
+                question: "2. ตามกฎการตั้งชื่อไฟล์ใน DOS ชื่อไฟล์มีความยาวสูงสุดกี่ตัวอักษร และนามสกุลมีความยาวสูงสุดกี่ตัวอักษร?",
+                options: ["ชื่อ 10 ตัวอักษร, นามสกุล 4 ตัวอักษร", "ชื่อ 8 ตัวอักษร, นามสกุล 3 ตัวอักษร", "ชื่อ 12 ตัวอักษร, นามสกุล 4 ตัวอักษร", "ชื่อ 8 ตัวอักษร, ไม่มีนามสกุล"],
+                correctAnswerIndex: 1
+            },
+            {
+                question: "3. เครื่องหมายพิเศษใดที่ใช้แทนอักขระใด ๆ ก็ได้ **หนึ่งตัวหรือศูนย์ตัว** ในการอ้างอิงชื่อไฟล์เป็นกลุ่ม (Wildcard Character)?",
+                options: ["เครื่องหมายดอกจัน (*)", "เครื่องหมายคำถาม (?)", "เครื่องหมายทับ (/)", "เครื่องหมายยัติภังค์ (-)"],
+                correctAnswerIndex: 1
+            },
+            {
+                question: "4. การเริ่มต้นทำงานของระบบคอมพิวเตอร์ที่เรียกว่า 'Cold Boot' หมายถึงอะไร?",
+                options: ["การกดปุ่ม Reset ขณะเครื่องเปิดอยู่", "การกดปุ่ม Ctrl+Alt+Del พร้อมกัน", "การเปิดเครื่องด้วยสวิตช์ปิดเปิดเครื่อง (Power)", "การบูทเครื่องเพื่อเข้าสู่ระบบ Windows"],
+                correctAnswerIndex: 2
+            },
+            {
+                question: "5. ไฟล์โปรแกรมคำสั่งใดในระบบปฏิบัติการ DOS ที่ถูกบรรจุขึ้นสู่หน่วยความจำหลักเมื่อมีการบูทเครื่อง?",
+                options: ["CONFIG.SYS", "AUTOEXEC.BAT", "IO.SYS", "COMMAND.COM"],
+                correctAnswerIndex: 3
+            },
+            {
+                question: "6. คำสั่งใดที่จัดเป็น 'คำสั่งภายใน' (Internal Command) ของ DOS ซึ่งถูกบรรจุอยู่ในหน่วยความจำหลักตลอดเวลาที่เครื่องเปิดใช้งานอยู่?",
+                options: ["FORMAT", "DISKCOPY", "CLS (CLEAR SCREEN)", "TREE"],
+                correctAnswerIndex: 2
+            },
+            {
+                question: "7. คำสั่งใดที่จัดเป็น 'คำสั่งภายนอก' (External Command) ของ DOS ซึ่งต้องถูกเรียกจากดิสก์เข้าสู่หน่วยความจำเมื่อต้องการใช้งานเท่านั้น?",
+                options: ["DIR (DIRECTORY)", "COPY", "REN (RENAME)", "CHKDSK (CHECK DISK)"],
+                correctAnswerIndex: 3
+            },
+            {
+                question: "8. หากต้องการดูรายชื่อแฟ้มข้อมูลทั้งหมดตาม **ความกว้าง** ของจอภาพ ควรใช้ Parameter ใดกับคำสั่ง DIR?",
+                options: ["/P", "/W", "/S", "/V"],
+                correctAnswerIndex: 1
+            },
+            {
+                question: "9. คำสั่งใดใช้สำหรับสร้างแฟ้มข้อมูลใหม่โดยรับข้อมูลจากคีย์บอร์ดโดยตรง และต้องจบด้วยการกดปุ่ม Ctrl+Z ตามด้วย Enter?",
+                options: ["COPY", "TYPE", "COPY CON", "MD (MAKE DIRECTORY)"],
+                correctAnswerIndex: 2
+            },
+            {
+                question: "10. หากผู้ใช้ต้องการย้ายกลับไปยัง **ROOT DIRECTORY** ทันที ไม่ว่าจะอยู่ที่ไดเรคทอรีย่อยระดับใดก็ตาม ควรใช้คำสั่ง CD ตามด้วยสัญลักษณ์ใด?",
+                options: ["CD..", "CD/W", "CD\\", "CD[d:]"],
+                correctAnswerIndex: 2
+            }
+        ];
+
+        // --- QUIZ CONSTANTS ---
+        const thaiOptions = ['ก', 'ข', 'ค', 'ง']; // ตัวเลือก ก, ข, ค, ง
+        const TIME_LIMIT_SECONDS = quizData.length * 60; // 10 ข้อ * 60 วินาที = 600 วินาที (10 นาที)
+
+        // --- QUIZ STATE ---
+        let currentQuestionIndex = 0;
+        let selectedAnswers = new Array(quizData.length).fill(null);
+        let studentName = '';
+        let studentId = ''; // Renamed internally to hold student number
+        let timeLeft = TIME_LIMIT_SECONDS;
+        let timerInterval = null;
+
+
+        // --- APPLICATION FLOW ---
+
+        window.onload = () => {
+            // No Firebase initialization needed
+            hideLoading(); 
+            window.showLoginView();
+        }
+
+        // --- TIMER FUNCTIONS ---
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const display = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            const timerElement = document.getElementById('timer-display');
+            if (timerElement) {
+                timerElement.textContent = display;
+                // Highlight red and pulse when less than 1 minute remains
+                if (timeLeft <= 60) {
+                    timerElement.classList.add('animate-pulse', 'text-red-600');
+                    timerElement.classList.remove('text-orange-500');
+                } else if (timeLeft <= 120) {
+                    timerElement.classList.add('text-orange-500');
+                    timerElement.classList.remove('text-red-600', 'animate-pulse');
+                } else {
+                    timerElement.classList.remove('text-red-600', 'animate-pulse', 'text-orange-500');
+                    timerElement.classList.add('text-gray-800');
+                }
+            }
+        }
+
+        function startTimer() {
+            window.stopTimer(); // Clear any existing timer
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                window.updateTimerDisplay();
+
+                if (timeLeft <= 0) {
+                    window.stopTimer();
+                    // Time's up, automatically submit
+                    window.showModal('หมดเวลาทำข้อสอบ', 'เวลาในการทำข้อสอบหมดลงแล้ว ระบบจะส่งคำตอบที่คุณเลือกไว้ทันที', false);
+                    setTimeout(() => { 
+                        window.hideModal('modal-confirm');
+                        window.submitQuiz(true); 
+                    }, 2000); // Give 2 seconds to read the message before submitting
+                }
+            }, 1000);
+        }
+
+        window.stopTimer = function() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+        window.updateTimerDisplay = updateTimerDisplay;
+        window.startTimer = startTimer; // Attach to window for global access
+
+
+        // --- UI MANAGEMENT ---
+
+        function showLoading(message) {
+            document.getElementById('loading-message').textContent = message;
+            document.getElementById('loading-overlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        function clearAppContainer() {
+            document.getElementById('app-container').innerHTML = '';
+        }
+
+        // --- LOGIN VIEW ---
+
+        window.showLoginView = function() {
+            window.stopTimer(); // Ensure timer is stopped if returning to login screen
+            clearAppContainer();
+            const html = `
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-700 text-center">เข้าสู่ระบบแบบทดสอบ</h2>
+                    <div class="space-y-4">
+                        <label class="block text-sm font-medium text-gray-700" for="name">ชื่อ-นามสกุล:</label>
+                        <input type="text" id="student-name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" placeholder="ระบุชื่อ-นามสกุล" required>
+                    </div>
+                    <div class="space-y-4">
+                        <label class="block text-sm font-medium text-gray-700" for="id">เลขที่:</label>
+                        <input type="number" id="student-id" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" placeholder="ระบุเลขที่" required>
+                    </div>
+                    <button onclick="startQuiz()" class="w-full py-3 mt-4 button-color text-white rounded-lg font-bold text-lg hover:bg-red-700 transition duration-150 shadow-md">
+                        เริ่มทำแบบทดสอบ (10 ข้อ)
+                    </button>
+                    <p class="text-xs text-gray-400 text-center mt-4">(ระบบจะไม่บันทึกผลคะแนน)</p>
+                </div>
+            `;
+            document.getElementById('app-container').innerHTML = html;
+        }
+
+        window.startQuiz = function() {
+            studentName = document.getElementById('student-name').value.trim();
+            studentId = document.getElementById('student-id').value.trim(); // Now holds the student number
+
+            if (!studentName || !studentId) {
+                window.showModal('กรุณากรอกข้อมูลให้ครบถ้วน', 'ต้องระบุ ชื่อ-นามสกุล และ เลขที่ เพื่อทำแบบทดสอบ', false);
+                return;
+            }
+
+            // Reset quiz state and start timer
+            currentQuestionIndex = 0;
+            selectedAnswers = new Array(quizData.length).fill(null);
+            timeLeft = TIME_LIMIT_SECONDS;
+            window.startTimer();
+            window.showQuizView();
+        }
+
+        // --- QUIZ VIEW ---
+
+        function showQuizView() {
+            clearAppContainer();
+            const q = quizData[currentQuestionIndex];
+            
+            const optionsHtml = q.options.map((option, index) => {
+                const isSelected = selectedAnswers[currentQuestionIndex] === index;
+                // Ensure option-selected uses the new bright color theme
+                const selectedClass = isSelected ? 'option-selected' : 'bg-gray-50 text-gray-700 hover:bg-gray-100';
+                
+                const optionPrefix = thaiOptions[index] ? thaiOptions[index] : ''; 
+
+                return `
+                    <button 
+                        data-index="${index}"
+                        onclick="selectAnswer(${index})"
+                        class="option-button w-full text-left p-4 border border-gray-300 rounded-xl font-medium ${selectedClass}">
+                        ${optionPrefix}. ${option} 
+                    </button>
+                `;
+            }).join('');
+
+            const progress = `${currentQuestionIndex + 1} / ${quizData.length}`;
+            const buttonText = currentQuestionIndex === quizData.length - 1 ? 'ส่งคำตอบ' : 'ข้อถัดไป';
+            const buttonAction = currentQuestionIndex === quizData.length - 1 ? 'confirmSubmission()' : 'nextQuestion()';
+            const backButtonClass = currentQuestionIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200';
+
+            const html = `
+                <div class="space-y-6">
+                    <div class="text-center">
+                        <p class="text-sm font-semibold header-color">${studentName} (เลขที่: ${studentId})</p>
+                        <p class="text-xl font-bold text-gray-800 mt-1">คำถามที่ ${progress}</p>
+                        <div class="h-1 bg-gray-200 rounded-full mt-3">
+                            <div class="button-color h-1 rounded-full" style="width: ${((currentQuestionIndex + 1) / quizData.length) * 100}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center bg-yellow-50 border border-yellow-200 p-3 rounded-xl font-bold text-gray-800 mt-4 shadow-sm">
+                        <p>เวลาที่เหลือ (10 นาที):</p>
+                        <div id="timer-display" class="text-2xl text-gray-800">--:--</div>
+                    </div>
+
+                    <div id="question-area" class="bg-white p-5 border border-gray-200 rounded-xl">
+                        <p class="text-lg font-semibold text-gray-900">${q.question}</p>
+                    </div>
+
+                    <div id="options-area" class="space-y-3">
+                        ${optionsHtml}
+                    </div>
+
+                    <div class="flex justify-between pt-4">
+                        <button onclick="prevQuestion()" class="px-5 py-3 bg-gray-100 text-gray-600 rounded-lg font-semibold transition duration-150 ${backButtonClass}">
+                            ย้อนกลับ
+                        </button>
+                        <button onclick="${buttonAction}" class="px-5 py-3 button-color text-white rounded-lg font-bold transition duration-150 hover:bg-red-700 shadow-md">
+                            ${buttonText}
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('app-container').innerHTML = html;
+            window.updateTimerDisplay(); // Initial display update
+        }
+        
+        window.showQuizView = showQuizView;
+
+        window.selectAnswer = function(index) {
+            selectedAnswers[currentQuestionIndex] = index;
+            window.showQuizView(); 
+        }
+
+        window.prevQuestion = function() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                window.showQuizView();
+            }
+        }
+
+        window.nextQuestion = function() {
+            if (selectedAnswers[currentQuestionIndex] === null) {
+                window.showModal('ยังไม่ได้เลือกคำตอบ', 'กรุณาเลือกคำตอบสำหรับคำถามนี้ก่อนไปต่อ', false);
+                return;
+            }
+            if (currentQuestionIndex < quizData.length - 1) {
+                currentQuestionIndex++;
+                window.showQuizView();
+            }
+        }
+
+        window.confirmSubmission = function() {
+            if (selectedAnswers.includes(null)) {
+                 window.showModal('ยังตอบไม่ครบ', `คุณยังไม่ได้ตอบคำถามอีก ${selectedAnswers.filter(a => a === null).length} ข้อ`, false);
+                return;
+            }
+            window.showModal('ยืนยันการส่งคำตอบ', 'คุณต้องการส่งคำตอบหรือไม่? หลังจากส่งแล้วจะไม่สามารถแก้ไขได้', true, window.submitQuiz);
+        }
+
+        // --- SUBMIT QUIZ (NO DB) ---
+
+        window.submitQuiz = function(isForced = false) {
+            window.stopTimer(); // STOP THE TIMER BEFORE SUBMISSION
+            window.hideModal('modal-confirm');
+            
+            let score = 0;
+            quizData.forEach((q, index) => {
+                if (selectedAnswers[index] === q.correctAnswerIndex) {
+                    score++;
+                }
+            });
+
+            const totalScore = score;
+            const message = isForced ? 'หมดเวลา: ส่งคำตอบอัตโนมัติ' : 'ผลการทดสอบของคุณ';
+
+            // Directly show the result view
+            window.showResultView(totalScore, quizData.length, message);
+        }
+
+        // --- RESULT VIEW ---
+
+        window.showResultView = function(score, total, message = 'ผลการทดสอบของคุณ', color = 'text-green-600') {
+            clearAppContainer();
+            const percentage = ((score / total) * 100).toFixed(0);
+
+            const html = `
+                <div class="text-center space-y-6 py-6">
+                    <h2 class="text-3xl font-extrabold text-gray-800">${message}</h2>
+                    <p class="text-lg text-gray-600">สวัสดีคุณ ${studentName} (เลขที่: ${studentId})</p>
+                    
+                    <div class="p-8 rounded-xl inline-block shadow-lg" style="background-color: #fffbeb; border: 3px solid #C0392B">
+                        <p class="text-6xl font-black header-color">${score}</p>
+                        <p class="text-xl font-semibold text-gray-600 mt-2">คะแนน (จาก ${total} ข้อ)</p>
+                    </div>
+
+                    <p class="text-2xl font-bold header-color">${percentage}%</p>
+                    
+                    <button onclick="showLoginView()" class="w-full py-3 mt-8 button-color text-white rounded-lg font-bold text-lg hover:bg-red-700 transition duration-150 shadow-md">
+                        ทำแบบทดสอบใหม่
+                    </button>
+                </div>
+            `;
+            document.getElementById('app-container').innerHTML = html;
+        }
+
+        // --- Custom Modal Functions (Attached to window for full global access) ---
+        
+        window.showModal = function(title, body, isConfirm, callback = null) {
+            const modal = document.getElementById('modal-confirm');
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-body').textContent = body;
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+            
+            // Adjust button style for confirmation dialog
+            confirmBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            confirmBtn.classList.add('button-color', 'hover:bg-red-700'); // Use new button color and hover
+            
+            if (isConfirm) {
+                confirmBtn.classList.remove('hidden');
+                confirmBtn.onclick = callback;
+            } else {
+                confirmBtn.classList.add('hidden');
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        window.hideModal = function(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+    </script>
+</body>
+</html>
