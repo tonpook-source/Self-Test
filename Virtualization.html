@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>โปรแกรม Virtualization เปรียบเทียบ (ปรับปรุง)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Light background */
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
+        }
+        /* Styling the header when expanded */
+        .accordion-header[aria-expanded="true"] {
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        .accordion-header[aria-expanded="true"] + .accordion-content {
+            max-height: 1200px; /* Increased max-height for content */
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+        .card-shadow {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .gradient-text {
+            background-image: linear-gradient(to right, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+    </style>
+</head>
+<body>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-light': '#c7d2fe',
+                        'primary-dark': '#4338ca',
+                        'accent': '#a855f7',
+                    },
+                }
+            }
+        }
+
+        const virtualizationData = [
+            {
+                id: 'virtualbox',
+                name: '1. Oracle VM VirtualBox',
+                type: 'Type 2 (Hosted)',
+                accentClass: 'border-l-4 border-green-500',
+                icon: 'fa-box-open',
+                details: [
+                    { title: 'คืออะไร', content: 'ซอฟต์แวร์จำลองเครื่องเสมือน (VMM) แบบ Type 2 ที่พัฒนาโดย Oracle และเป็นแบบ **ฟรีและโอเพนซอร์ส**' },
+                    { title: 'หลักการทำงาน', content: 'ติดตั้งบนระบบปฏิบัติการหลัก (Host OS) แล้วใช้ Hypervisor จำลองฮาร์ดแวร์เพื่อรัน Guest OS โดยทำงานเป็นแอปพลิเคชันหนึ่งบน Host OS' },
+                    { title: 'เหมาะสำหรับ', content: 'ผู้ใช้งานทั่วไป, นักเรียน, นักพัฒนาซอฟต์แวร์ที่ต้องการทดลอง OS หรือทดสอบแอปพลิเคชันโดยไม่มีค่าใช้จ่าย' },
+                    { title: 'ข้อดี', content: '✅ ฟรีและโอเพนซอร์ส, รองรับ Host/Guest OS หลากหลาย, ใช้งานง่าย' },
+                    { title: 'ข้อเสีย', content: '❌ ประสิทธิภาพอาจไม่สูงเท่าโปรแกรมเชิงพาณิชย์, ฟีเจอร์ระดับองค์กรจำกัด' }
+                ]
+            },
+            {
+                id: 'vmware',
+                name: '2. VMware Workstation (Pro/Player)',
+                type: 'Type 2 (Hosted) Professional',
+                accentClass: 'border-l-4 border-blue-500',
+                icon: 'fa-server',
+                details: [
+                    { title: 'คืออะไร', content: 'ซอฟต์แวร์จำลองเครื่องเสมือนแบบ Type 2 เชิงพาณิชย์ มีชื่อเสียงด้าน **ประสิทธิภาพและความเสถียรสูง**' },
+                    { title: 'หลักการทำงาน', content: 'ทำงานบน Host OS แต่มีการเข้าถึงฮาร์ดแวร์ที่ลึกกว่าคู่แข่ง Type 2 ทำให้มีความเร็วสูงและรองรับการจำลองกราฟิก (3D) ได้ดี' },
+                    { title: 'เหมาะสำหรับ', content: 'ผู้เชี่ยวชาญด้าน IT, นักพัฒนาซอฟต์แวร์, นักทดสอบระบบ ที่ต้องการเครื่องมือระดับมืออาชีพและฟีเจอร์การจัดการขั้นสูง' },
+                    { title: 'ข้อดี', content: '✅ ประสิทธิภาพและความเสถียรสูง, มีฟีเจอร์ครบถ้วน (Snapshot, Cloning, Networking), รองรับกราฟิก 3D ได้ดี' },
+                    { title: 'ข้อเสีย', content: '❌ **มีค่าใช้จ่าย** (สำหรับรุ่น Pro), อาจจะซับซ้อนสำหรับผู้เริ่มต้น' }
+                ]
+            },
+            {
+                id: 'parallels',
+                name: '3. Parallels Desktop',
+                type: 'Type 2 (Hosted) macOS Focus',
+                accentClass: 'border-l-4 border-teal-500',
+                icon: 'fa-apple-alt',
+                details: [
+                    { title: 'คืออะไร', content: 'ซอฟต์แวร์จำลองเครื่องเสมือนแบบ Type 2 ที่ออกแบบมาเฉพาะสำหรับ **macOS**' },
+                    { title: 'หลักการทำงาน', content: 'เน้นการผสานรวม (Integration) ที่ไร้รอยต่อกับ Mac OS ทำให้รัน Windows ได้อย่างรวดเร็วและเป็นธรรมชาติ (เช่น โหมด Coherence)' },
+                    { title: 'เหมาะสำหรับ', content: 'ผู้ใช้ Mac (ทั้ง Intel และ Apple Silicon) ที่ต้องการรัน Windows หรือแอปพลิเคชัน Windows โดยเน้นความเร็วและความง่ายในการใช้งาน' },
+                    { title: 'ข้อดี', content: '✅ ความเร็วในการบูต/ทำงานสูง, ใช้งานง่ายที่สุดสำหรับ Mac, โหมด Coherence สะดวกมาก' },
+                    { title: 'ข้อเสีย', content: '❌ **มีค่าใช้จ่ายสูง** และต้องต่ออายุรายปี, ใช้ได้เฉพาะบน macOS เท่านั้น' }
+                ]
+            },
+            {
+                id: 'hyperv',
+                name: '4. Microsoft Hyper-V',
+                type: 'Type 1 (Bare-Metal) / Built-in',
+                accentClass: 'border-l-4 border-indigo-500',
+                icon: 'fa-microchip',
+                details: [
+                    { title: 'คืออะไร', content: 'เทคโนโลยี Hypervisor ของ Microsoft ซึ่งเป็นได้ทั้ง **Type 1 (Bare-Metal)** ใน Windows Server และเป็นฟีเจอร์ Built-in ใน Windows Pro' },
+                    { title: 'หลักการทำงาน', content: 'ทำงานใกล้ชิดกับฮาร์ดแวร์มากที่สุด (Type 1) ทำให้มีประสิทธิภาพและความเสถียรสูง เหมาะสำหรับงานหนักและสภาพแวดล้อมระดับองค์กร' },
+                    { title: 'เหมาะสำหรับ', content: 'องค์กรที่ใช้ Windows Server, ผู้ดูแลระบบ, ผู้ใช้ Windows Pro ที่ต้องการ **ความเสถียรระดับองค์กร**' },
+                    { title: 'ข้อดี', content: '✅ ประสิทธิภาพและเสถียรภาพสูง, **ฟรี** สำหรับผู้ใช้ Windows Pro/Server, ผสานรวมกับเครื่องมือของ Microsoft ได้ดี' },
+                    { title: 'ข้อเสีย', content: '❌ อาจเข้ากันได้จำกัดกับซอฟต์แวร์ Virtualization อื่นๆ ที่เป็น Type 2, ไม่รองรับบน Windows Home Edition' }
+                ]
+            }
+        ];
+
+        function getStatusIcon(text) {
+            if (text.startsWith('✅')) return `<i class="fa-solid fa-check-circle text-green-500 mr-2"></i>`;
+            if (text.startsWith('❌')) return `<i class="fa-solid fa-times-circle text-red-500 mr-2"></i>`;
+            return `<i class="fa-solid fa-circle-info text-primary-dark mr-2 opacity-60"></i>`;
+        }
+
+        function renderAccordion() {
+            const container = document.getElementById('accordion-container');
+            virtualizationData.forEach(item => {
+                const html = `
+                    <div class="rounded-xl card-shadow overflow-hidden bg-white ${item.accentClass} transition duration-300 hover:shadow-xl">
+                        <!-- Header Button -->
+                        <button id="header-${item.id}"
+                                class="accordion-header w-full flex items-center p-6 text-left font-semibold text-lg transition duration-300 ease-in-out hover:bg-gray-50 focus:outline-none"
+                                aria-expanded="false"
+                                aria-controls="content-${item.id}"
+                                onclick="toggleAccordion('${item.id}')">
+                            
+                            <!-- Icon and Name -->
+                            <div class="flex items-center flex-grow">
+                                <i class="fa-solid ${item.icon} text-primary-dark mr-4 text-2xl w-6"></i>
+                                <span class="text-gray-900 font-bold mr-3 text-xl">${item.name}</span>
+                                
+                                <!-- Type Badge -->
+                                <span class="hidden sm:inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-light text-primary-dark shadow-sm">
+                                    ${item.type}
+                                </span>
+                            </div>
+                            
+                            <!-- Chevron Icon -->
+                            <svg id="icon-${item.id}" class="w-5 h-5 text-accent transform transition-transform duration-300" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+
+                        <!-- Content Area -->
+                        <div id="content-${item.id}" class="accordion-content px-6 border-t border-gray-100 bg-gray-50" role="region" aria-labelledby="header-${item.id}">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                ${item.details.map(detail => `
+                                    <div class="${(detail.title.includes('ข้อดี') || detail.title.includes('ข้อเสีย')) ? 'md:col-span-1' : 'md:col-span-2'}">
+                                        <h4 class="text-base font-semibold text-gray-700 mb-1 flex items-center">
+                                            ${getStatusIcon(detail.title)}
+                                            ${detail.title}
+                                        </h4>
+                                        <p class="text-sm text-gray-600 pl-8" style="white-space: pre-line;">${detail.content.replace('✅', '').replace('❌', '')}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+
+        function toggleAccordion(id) {
+            const header = document.getElementById(`header-${id}`);
+            const content = document.getElementById(`content-${id}`);
+            const icon = document.getElementById(`icon-${id}`);
+            const isExpanded = header.getAttribute('aria-expanded') === 'true';
+
+            // Close all others first
+            document.querySelectorAll('.accordion-header').forEach(h => {
+                if (h.id !== `header-${id}`) {
+                    const otherContent = document.getElementById(h.getAttribute('aria-controls'));
+                    h.setAttribute('aria-expanded', 'false');
+                    otherContent.style.maxHeight = null;
+                    otherContent.style.paddingTop = '0';
+                    otherContent.style.paddingBottom = '0';
+                    document.getElementById(`icon-${h.id.split('-')[1]}`).classList.remove('rotate-180');
+                    h.classList.remove('bg-indigo-50'); // Remove highlight
+                }
+            });
+
+            if (isExpanded) {
+                // Close it
+                header.setAttribute('aria-expanded', 'false');
+                content.style.maxHeight = null;
+                content.style.paddingTop = '0';
+                content.style.paddingBottom = '0';
+                icon.classList.remove('rotate-180');
+                header.classList.remove('bg-indigo-50'); // Remove highlight
+            } else {
+                // Open selected one
+                header.setAttribute('aria-expanded', 'true');
+                content.style.maxHeight = content.scrollHeight + 50 + 'px'; 
+                content.style.paddingTop = '1.5rem';
+                content.style.paddingBottom = '1.5rem';
+                icon.classList.add('rotate-180');
+                header.classList.add('bg-indigo-50'); // Add highlight
+            }
+        }
+
+        // Initial rendering on load
+        window.onload = renderAccordion;
+    </script>
+    
+    <!-- Main Container -->
+    <div class="min-h-screen flex flex-col items-center py-12 px-4 bg-gray-100">
+        <header class="text-center mb-12 w-full max-w-5xl">
+            <!-- NEW: Added Instructor and Subject -->
+            <p class="text-lg text-primary-dark font-semibold">รายวิชาระบบปฏิบัติการ (Operating Systems)</p>
+            <p class="text-md text-gray-600 mb-4">ครูผู้สอน: ธนพล อ่อนพุก</p>
+            
+            <h1 class="text-5xl font-extrabold mb-3 gradient-text">
+                Virtualization Solutions Comparison
+            </h1>
+            <p class="text-xl text-gray-600 font-medium">
+                เปรียบเทียบคุณสมบัติหลักของโปรแกรมจำลองเสมือนสำหรับผู้ใช้งานและองค์กร
+            </p>
+            <div class="h-1 bg-accent w-24 mx-auto mt-6 rounded-full opacity-75"></div>
+        </header>
+
+        <!-- Accordion List -->
+        <div id="accordion-container" class="w-full max-w-5xl space-y-6">
+            <!-- Content generated by JavaScript -->
+        </div>
+
+        <!-- NEW: Hypervisor Explanation Section -->
+        <div class="w-full max-w-5xl mt-16">
+            <div class="bg-white rounded-xl card-shadow p-6 md:p-8 border-t-4 border-accent">
+                <h2 class="text-2xl font-bold text-primary-dark mb-5 flex items-center">
+                    <i class="fa-solid fa-layer-group mr-3 text-accent"></i>
+                    คำอธิบายประเภท Hypervisor
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Type 1 (Bare-Metal)</h3>
+                        <p class="text-sm text-gray-600 mt-1">
+                            ติดตั้งโดยตรงบนฮาร์ดแวร์ของเซิร์ฟเวอร์ (ไม่มี Host OS) ทำงานได้เต็มประสิทธิภาพสูงสุด เหมาะสำหรับระดับองค์กรและ Data Center
+                            <br><strong>(เช่น VMware ESXi, Microsoft Hyper-V on Server)</strong>
+                        </p>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Type 2 (Hosted)</h3>
+                        <p class="text-sm text-gray-600 mt-1">
+                            ติดตั้งเป็นแอปพลิเคชันบนระบบปฏิบัติการหลัก (Host OS) ใช้งานง่าย สะดวก เหมาะสำหรับการใช้งานส่วนตัว, การเรียนรู้ หรือทดสอบระบบ
+                            <br><strong>(เช่น VirtualBox, VMware Workstation)</strong>
+                        </siv>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-16 pt-8 text-center text-sm text-gray-500 w-full max-w-5xl border-t border-gray-200">
+            <!-- NEW: Added Department and College -->
+            <p class="font-semibold text-gray-600">แผนกวิชาช่างอิเล็กทรอนิกส์ วิทยาลัยเทคนิคราชบุรี</p>
+            <p class="mt-2">&copy; 2024 Virtualization Overview. ข้อมูลเพื่อการศึกษาและเปรียบเทียบเทคโนโลยี VM</p>
+        </footer>
+    </div>
+
+</body>
+</html>
