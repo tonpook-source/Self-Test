@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สรุป บทที่ 2: นักวิเคราะห์ระบบและการพัฒนาระบบ</title>
+    <!-- โหลด Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- โหลดฟอนต์ Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ใช้ฟอนต์ Sarabun สำหรับภาษาไทย และ Inter สำหรับภาษาอังกฤษ */
+        body {
+            font-family: 'Sarabun', 'Inter', sans-serif;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Sarabun', 'Inter', sans-serif;
+            font-weight: 700;
+        }
+
+        /* สไตล์สำหรับ Flowchart (SVG) */
+        .flow-node {
+            fill: #ebf8ff; /* bg-blue-50 */
+            stroke: #90cdf4; /* border-blue-300 */
+            stroke-width: 2px;
+            rx: 8px; /* rounded-lg */
+        }
+        .flow-text {
+            font-family: 'Sarabun', 'Inter', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            fill: #2c5282; /* text-blue-800 */
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+        .flow-arrow {
+            stroke: #718096; /* stroke-gray-500 */
+            stroke-width: 2px;
+            marker-end: url(#arrowhead);
+        }
+        .flow-arrow-dashed {
+            stroke: #a0aec0; /* stroke-gray-400 */
+            stroke-width: 2px;
+            stroke-dasharray: 5, 5;
+            marker-end: url(#arrowhead);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 leading-relaxed">
+
+    <!-- Container หลัก -->
+    <div class="container max-w-4xl mx-auto my-8 sm:my-12 p-6 sm:p-10 bg-white rounded-xl shadow-lg">
+
+        <!-- ส่วนหัวเรื่องหลัก -->
+        <header>
+            <h1 class="text-center text-3xl sm:text-4xl font-bold text-blue-700 mb-6 pb-4 border-b-2 border-gray-200">
+                สรุปเนื้อหาสำคัญจากบทที่ 2: <br class="sm:hidden"> นักวิเคราะห์ระบบและการพัฒนาระบบ
+            </h1>
+        </header>
+
+        <!-- (ใหม่) แผนผังโมเดลความสัมพันธ์ -->
+        <section class="mb-12">
+            <h2 class="text-2xl sm:text-3xl font-semibold text-blue-600 mt-8 mb-6 pb-2 border-b border-gray-300 flex items-center">
+                <!-- Icon: Flowchart -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 sm:w-8 sm:h-8 mr-3 text-blue-500">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h5.25m5.25-.75L17.25 9m0 0L21 12.75M17.25 9v12" />
+                </svg>
+                แผนผังโมเดลความสัมพันธ์
+            </h2>
+            <div class="w-full overflow-x-auto p-4 bg-gray-50 rounded-lg shadow-inner">
+                <svg viewBox="0 0 400 640" class="min-w-full h-auto" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                        refX="10" refY="3.5" orient="auto">
+                          <polygon points="0 0, 10 3.5, 0 7" fill="#718096" />
+                        </marker>
+                    </defs>
+
+                    <!-- Node 1: SA -->
+                    <g transform="translate(200, 40)">
+                        <rect class="flow-node" width="160" height="40" x="-80" y="-20"></rect>
+                        <text class="flow-text" x="0" y="0">นักวิเคราะห์ระบบ (SA)</text>
+                    </g>
+
+                    <!-- Node 2: หน้าที่ -->
+                    <g transform="translate(80, 120)">
+                        <rect class="flow-node" width="120" height="40" x="-60" y="-20"></rect>
+                        <text class="flow-text" x="0" y="0">หน้าที่ของ SA</text>
+                    </g>
+                    
+                    <!-- Node 3: คุณสมบัติ -->
+                    <g transform="translate(320, 120)">
+                        <rect class="flow-node" width="120" height="40" x="-60" y="-20"></rect>
+                        <text class="flow-text" x="0" y="0">คุณสมบัติของ SA</text>
+                    </g>
+
+                    <!-- Node 4: ผู้ใช้ระบบ -->
+                    <g transform="translate(200, 200)">
+                        <rect class="flow-node" width="120" height="40" x="-60" y="-20"></rect>
+                        <text class="flow-text" x="0" y="0">ผู้ใช้ระบบ</text>
+                    </g>
+
+                    <!-- Node 5: ข้อบกพร่อง -->
+                    <g transform="translate(200, 300)">
+                        <rect class="flow-node" width="140" height="40" x="-70" y="-20" style="fill: #fff5f5; stroke: #feb2b2;"></rect>
+                        <text class="flow-text" x="0" y="0" style="fill: #c53030;">ข้อบกพร่องระบบเก่า</text>
+                    </g>
+
+                    <!-- Node 6: วิธีการพัฒนา -->
+                    <g transform="translate(200, 400)">
+                        <rect class="flow-node" width="140" height="40" x="-70" y="-20"></rect>
+                        <text class="flow-text" x="0" y="0">วิธีการพัฒนาระบบ</text>
+                    </g>
+                    
+                    <!-- Node 7: เครื่องมือ -->
+                    <g transform="translate(200, 500)">
+                        <rect class="flow-node" width="140" height="40" x="-70" y="-20"></rect>
+                        <text class="flow-text" x="0" y="0">เครื่องมือ & เทคนิค</text>
+                    </g>
+
+                    <!-- Node 8: SDLC (ย่อย) -->
+                    <g transform="translate(80, 500)">
+                        <rect class="flow-node" width="100" height="40" x="-50" y="-20" style="fill: #f0fff4; stroke: #9ae6b4;"></rect>
+                        <text class="flow-text" x="0" y="0" style="font-size: 10px; fill: #2f855a;">(SDLC)</text>
+                    </g>
+                    
+                    <!-- Node 9: OOA (ย่อย) -->
+                    <g transform="translate(320, 500)">
+                        <rect class="flow-node" width="100" height="40" x="-50" y="-20" style="fill: #f0fff4; stroke: #9ae6b4;"></rect>
+                        <text class="flow-text" x="0" y="0" style="font-size: 10px; fill: #2f855a;">(OOA)</text>
+                    </g>
+                    
+
+                    <!-- Arrows -->
+                    <path class="flow-arrow" d="M 200 60 Q 140 80, 80 100"></path> <!-- SA -> หน้าที่ -->
+                    <path class="flow-arrow" d="M 200 60 Q 260 80, 320 100"></path> <!-- SA -> คุณสมบัติ -->
+                    
+                    <path class="flow-arrow-dashed" d="M 200 60 V 180"></path> <!-- SA -> ผู้ใช้ -->
+                    
+                    <path class="flow-arrow" d="M 200 220 V 280"></path> <!-- ผู้ใช้ -> ข้อบกพร่อง -->
+                    <path class="flow-arrow" d="M 200 320 V 380"></path> <!-- ข้อบกพร่อง -> วิธีการ -->
+                    <path class="flow-arrow" d="M 200 420 V 480"></path> <!-- วิธีการ -> เครื่องมือ -->
+
+                    <!-- Arrows แตกย่อย -->
+                    <path class="flow-arrow-dashed" d="M 165 420 Q 120 450, 80 480"></path> <!-- วิธีการ -> SDLC -->
+                    <path class="flow-arrow-dashed" d="M 235 420 Q 280 450, 320 480"></path> <!-- วิธีการ -> OOA -->
+
+                </svg>
+            </div>
+        </section>
+        <!-- (จบส่วนใหม่) -->
+
+
+        <!-- เนื้อหาส่วนที่ 1: นักวิเคราะห์ระบบ -->
+        <section class="mb-8">
+            <h2 class="text-2xl sm:text-3xl font-semibold text-blue-600 mt-8 mb-4 pb-2 border-b border-gray-300 flex items-center">
+                <!-- Icon: Person/Identification -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 sm:w-8 sm:h-8 mr-3 text-blue-500">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                </svg>
+                นักวิเคราะห์ระบบ (System Analyst - SA)
+            </h2>
+            <p class="mb-4 text-base sm:text-lg">
+                <strong class="font-semibold text-gray-900">นักวิเคราะห์ระบบ (SA)</strong> คือบุคคลที่ทำหน้าที่เป็นผู้ประสานงานหรือคนกลางระหว่างระบบสารสนเทศกับกลุ่มผู้ที่เกี่ยวข้องต่างๆ เช่น เจ้าของระบบ ผู้ใช้ระบบ ผู้จัดการ โปรแกรมเมอร์ และทีมงานด้านเทคนิค อาชีพนี้เกิดขึ้นเนื่องจากการพัฒนาระบบสารสนเทศในปัจจุบันมีความจำเป็นและท้าทาย และต้องอาศัยทีมงานพัฒนาระบบ (System Development Team) ที่มีความเชี่ยวชาญ
+            </p>
+            <p class="text-base sm:text-lg">
+                บทบาทของ SA จะแตกต่างจาก <strong class="font-semibold text-gray-900">โปรแกรมเมอร์ (Programmer)</strong> โดยโปรแกรมเมอร์จะมุ่งเน้นที่การเขียนโปรแกรมตามขอบเขตที่กำหนด แต่นักวิเคราะห์ระบบจะทำงานที่กว้างกว่า โดยต้องผสมผสานปัจจัยต่างๆ ทั้งผู้ใช้ เทคโนโลยี และวิธีการ เพื่อวิเคราะห์และออกแบบระบบให้โปรแกรมเมอร์นำไปพัฒนาต่อ
+            </p>
+        </section>
+
+        <!-- เนื้อหาส่วนที่ 2: หน้าที่ของนักวิเคราะห์ระบบ -->
+        <section class="mb-8">
+            <h2 class="text-2xl sm:text-3xl font-semibold text-blue-600 mt-8 mb-4 pb-2 border-b border-gray-300 flex items-center">
+                <!-- Icon: Clipboard List -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 sm:w-8 sm:h-8 mr-3 text-blue-500">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75c0-.231-.035-.454-.1-.664M6.75 7.5H4.875c-1.125 0-2.062.938-2.062 2.063v7.875c0 1.125.937 2.063 2.063 2.063h9.75c1.125 0 2.063-.938 2.063-2.063v-7.875c0-1.125-.938-2.063-2.063-2.063H15.75m-9 0h9v.008H6.75V7.5Z" />
+                </svg>
+                หน้าที่ของนักวิเคราะห์ระบบ
+            </h2>
+
+            <!-- (ใหม่) แผนผังย่อย: หน้าที่ของนักวิเคราะห์ระบบ -->
+            <div class="w-full overflow-x-auto p-4 bg-gray-50 rounded-lg shadow-inner my-6">
+                <svg viewBox="0 0 400 300" class="min-w-full h-auto" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <marker id="arrowhead2" markerWidth="10" markerHeight="7" 
+                        refX="10" refY="3.5" orient="auto">
+                          <polygon points="0 0, 10 3.5, 0 7" fill="#718096" />
+                        </marker>
+                    </defs>
+
+                    <!-- Node 1: Main Title -->
+                    <g transform="translate(200, 40)">
+                        <rect class="flow-node" width="160" height="40" x="-80" y="-20"></rect>
+                        <text class="flow-text" x="0" y="0">หน้าที่หลัก 3 ประการ</text>
+                    </g>
+
+                    <!-- Node 2: Planning -->
+                    <g transform="translate(80, 140)">
+                        <rect class="flow-node" width="120" height="40" x="-60" y="-20" style="fill: #f0fff4; stroke: #9ae6b4;"></rect>
+                        <text class="flow-text" x="0" y="0" style="fill: #2f855a;">1. การวางแผน</text>
+                    </g>
+                    
+                    <!-- Node 3: Analysis -->
+                    <g transform="translate(200, 140)">
+                        <rect class="flow-node" width="120" height="40" x="-60" y="-20" style="fill: #f0fff4; stroke: #9ae6b4;"></rect>
+                        <text class="flow-text" x="0" y="0" style="fill: #2f855a;">2. การวิเคราะห์</text>
+                    </g>
+                    
+                    <!-- Node 4: Design -->
+                    <g transform="translate(320, 140)">
+                        <rect class="flow-node" width="120" height="40" x="-60" y="-20" style="fill: #f0fff4; stroke: #9ae6b4;"></rect>
+                        <text class="flow-text" x="0" y="0" style="fill: #2f855a;">3. การออกแบบ</text>
+                    </g>
+                    
+                    <!-- Node 5: Other duties -->
+                    <g transform="translate(200, 240)">
+                        <rect class="flow-node" width="160" height="40" x="-80" y="-20" style="fill: #fafafa; stroke: #e2e8f0;"></rect>
+                        <text class="flow-text" x="0" y="0" style="fill: #4a5568;">(และหน้าที่สำคัญอื่นๆ)</text>
+                    </g>
+
+                    <!-- Arrows from Main -->
+                    <path d="M 200 60 Q 140 80, 80 120" class="flow-arrow" style="marker-end: url(#arrowhead2);" fill="none"></path>
+                    <path d="M 200 60 V 120" class="flow-arrow" style="marker-end: url(#arrowhead2);" fill="none"></path>
+                    <path d="M 200 60 Q 260 80, 320 120" class="flow-arrow" style="marker-end: url(#arrowhead2);" fill="none"></path>
+                    
+                    <!-- Dashed arrow to other duties -->
+                    <path class="flow-arrow-dashed" d="M 200 160 V 220" style="marker-end: url(#arrowhead2);" fill="none"></path>
+                </svg>
+            </div>
+            <!-- (จบส่วนแผนผังย่อย) -->
+
+
+            <p class="mb-4 text-base sm:text-lg">หน้าที่หลักของนักวิเคราะห์ระบบมี 3 ประการ:</p>
+            <ol class="list-decimal list-inside pl-4 space-y-2 text-base sm:text-lg">
+                <li><strong class="font-semibold">การวางแผน (Planning):</strong> ศึกษาความเหมาะสมในการนำระบบสารสนเทศมาใช้</li>
+                <li><strong class="font-semibold">การวิเคราะห์ระบบ (System Analysis):</strong> ค้นหาข้อเท็จจริง วิเคราะห์ปัญหา และเสนอแนวทางแก้ไขตามความต้องการของผู้ใช้</li>
+                <li><strong class="font-semibold">การออกแบบระบบ (System Design):</strong> กำหนดคุณสมบัติและรูปแบบของระบบงานใหม่โดยประยุกต์ใช้คอมพิวเตอร์เพื่อแก้ปัญหา</li>
+            </ol>
+            <p class="mt-4 mb-4 text-base sm:text-lg">นอกจากนี้ SA ยังมีหน้าที่สำคัญอื่นๆ ในระหว่างการพัฒนาระบบ ได้แก่:</p>
+            <ul class="list-disc list-inside pl-4 space-y-2 text-base sm:text-lg">
+                <li>ติดต่อประสานงานกับผู้ใช้และผู้บริหาร</li>
+                <li>รวบรวมข้อมูลระบบเดิมเพื่อทำความเข้าใจปัญหา</li>
+                <li>วิเคราะห์เปรียบเทียบค่าใช้จ่ายกับผลประโยชน์ (Cost-Benefit Analysis)</li>
+                <li>จัดทำเอกสารประกอบ พจนานุกรมข้อมูล (Data Dictionary) และคู่มือฝึกอบรม</li>
+                <li>กำหนดมาตรการรักษาความปลอดภัยของระบบ</li>
+                <li>ร่วมทดสอบระบบ ติดตั้งระบบ และบำรุงรักษาระบบหลังการใช้งาน</li>
+                <li>เป็นที่ปรึกษาและผู้แก้ปัญหาให้ผู้ใช้ระบบ</li>
+            </ul>
+        </section>
+
+        <!-- เนื้อหาส่วนที่ 3: คุณสมบัติ -->
+        <section class="mb-8">
+            <h2 class="text-2xl sm:text-3xl font-semibold text-blue-600 mt-8 mb-4 pb-2 border-b border-gray-300 flex items-center">
+                <!-- Icon: Sparkles/Check -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 sm:w-8 sm:h-8 mr-3 text-blue-500">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.452-2.452L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.452-2.452L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.452 2.452L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.452 2.452Z" />
+                </svg>
+                คุณสมบัติของนักวิเคราะห์ระบบ
+            </h2>
+            <p class="mb-4 text-base sm:text-lg">นักวิเคราะห์ระบบที่ดีควรมีคุณสมบัติที่หลากหลาย ทั้งด้านเทคนิค ธุรกิจ และการสื่อสาร ได้แก่:</p>
+
+            <!-- (ใหม่) แผนผังย่อย: คุณสมบัติ -->
+            <div class="w-full overflow-x-auto p-4 bg-gray-50 rounded-lg shadow-inner my-6">
+                <svg viewBox="0 0 400 320" class="min-w-full h-auto" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <marker id="arrowhead3" markerWidth="10" markerHeight="7" 
+                        refX="10" refY="3.5" orient="auto">
+                          <polygon points="0 0, 10 3.5, 0 7" fill="#718096" />
+                        </marker>
+                    </defs>
+            
+                    <!-- Node 1: Main Title -->
+                    <g transform="translate(200, 40)">
+                        <rect class="flow-node" width="160" height="40" x="-80" y="-20"></rect>
+                        <text class="flow-text" x="0" y="0">คุณสมบัติของ SA</text>
+                    </g>
+            
+                    <!-- Node 2: Technical -->
+                    <g transform="translate(80, 140)">
+                        <rect class="flow-node" width="120" height="40" x="-60" y="-20" style="fill: #f0fff4; stroke: #9ae6b4;"></rect>
+                        <text class="flow-text" x="0" y="0" style="fill: #2f855a;">ด้านเทคนิค</text>
+                    </g>
+                    
+                    <!-- Node 3: Business -->
+                    <g transform="translate(320, 140)">
+                        <rect class="flow-node" width="120" height="40" x="-60" y="-20" style="fill: #f0fff4; stroke: #9ae6b4;"></rect>
+                        <text class="flow-text" x="0" y="0" style="fill: #2f855a;">ด้านธุรกิจ</text>
+                    </g>
+                    
+                    <!-- Node 4: Interpersonal -->
+                    <g transform="translate(80, 240)">
+                        <rect class="flow-node" width="120" height="40" x="-60" y="-20" style="fill: #f0fff4; stroke: #9ae6b4;"></rect>
+                        <text class="flow-text" x="0" y="0" style="font-size: 10px; fill: #2f855a;">ด้านการสื่อสาร/คน</text>
+                    </g>
+                    
+                    <!-- Node 5: Ethics -->
+                    <g transform="translate(320, 240)">
+                        <rect class="flow-node" width="120" height="40" x="-60" y="-20" style="fill: #f0fff4; stroke: #9ae6b4;"></rect>
+                        <text class="flow-text" x="0" y="0" style="fill: #2f855a;">ด้านจรรยาบรรณ</text>
+                    </g>
+            
+                    <!-- Arrows from Main -->
+                    <path d="M 190 60 Q 140 80, 80 120" class="flow-arrow" style="marker-end: url(#arrowhead3);" fill="none"></path>
+                    <path d="M 210 60 Q 260 80, 320 120" class="flow-arrow" style="marker-end: url(#arrowhead3);" fill="none"></path>
+                    <path d="M 190 60 Q 130 140, 80 220" class="flow-arrow" style="marker-end: url(#arrowhead3);" fill="none"></path>
+                    <path d="M 210 60 Q 270 140, 320 220" class="flow-arrow" style="marker-end: url(#arrowhead3);" fill="none"></path>
+                </svg>
+            </div>
+            <!-- (จบส่วนแผนผังย่อย) -->
+
+            <ul class="list-disc list-inside pl-4 space-y-2 text-base sm:text-lg">
+                <li>มีพื้นฐานด้านคอมพิวเตอร์และการเขียนโปรแกรม</li>
+                <li>มีความเข้าใจในเทคโนโลยีใหม่ๆ และติดตามอยู่เสมอ</li>
+                <li>มีความเข้าใจในระบบการดำเนินงานของธุรกิจ</li>
+                <li>มีทักษะในการสื่อสาร มนุษยสัมพันธ์ และความเป็นผู้นำ</li>
+                <li>สามารถวิเคราะห์ปัญหาอย่างเป็นระบบ และวิเคราะห์ต้นทุนและผลตอบแทนได้</li>
+                <li>ทำงานเป็นทีมและรับฟังผู้อื่นได้ดี</li>
+                <li>มีจรรยาบรรณ ไม่เปิดเผยข้อมูลขององค์การ</li>
+            </ul>
+        </section>
+
+        <!-- เนื้อหาส่วนที่ 4: ผู้ใช้ระบบ -->
+        <section class="mb-8">
+            <h2 class="text-2xl sm:text-3xl font-semibold text-blue-600 mt-8 mb-4 pb-2 border-b border-gray-300 flex items-center">
+                <!-- Icon: Users -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 sm:w-8 sm:h-8 mr-3 text-blue-500">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A9.06 9.06 0 0 1 6 18.719m12 0a9.094 9.094 0 0 0-3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A9.06 9.06 0 0 1 6 18.719m12 0a9.094 9.094 0 0 0-3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A9.06 9.06 0 0 1 6 18.719m-3.75 0a3.004 3.004 0 0 0-4.682-2.72M3 18.719l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 1.5 21c-.221 0-.438-.008-.65-.024l.008-.004A9.094 9.094 0 0 1 0 18.72M3 18.719a9.094 9.094 0 0 1 3-5.972M15 18.719a9.094 9.094 0 0 1 3-5.972M5.25 3.75a3 3 0 1 1 6 0 3 3 0 0 1-6 0Zm12 0a3 3 0 1 1 6 0 3 3 0 0 1-6 0ZM12 3.75a3 3 0 1 1 6 0 3 3 0 0 1-6 0Z" />
+                </svg>
+                ความสำคัญของผู้ใช้ระบบ
+            </h2>
+            <p class="mb-4 text-base sm:text-lg">
+                <strong class="font-semibold text-gray-900">ผู้ใช้ระบบ (System Users)</strong> คือผู้ที่ใช้งานและมีปฏิสัมพันธ์กับระบบโดยตรง พวกเขามีบทบาทสำคัญอย่างยิ่งต่อการพัฒนาระบบ เนื่องจากเป็นผู้มีประสบการณ์ตรง (Firsthand Experience) ข้อมูลจากผู้ใช้ระบบมีความสำคัญในการระบุรายละเอียด ดังนี้:
+            </p>
+            <ol class="list-decimal list-inside pl-4 space-y-2 text-base sm:text-lg">
+                <li>ข้อมูลหรือสารสนเทศใดที่องค์การต้องการ แต่ระบบปัจจุบันไม่มีให้</li>
+                <li>ความไม่พึงพอใจต่อระบบปัจจุบัน เช่น ระบบซับซ้อน ล่าช้า หรือข้อมูลผิดพลาด</li>
+                <li>ความต้องการว่าระบบใหม่ควรมีคุณลักษณะหรือรูปแบบการทำงานอย่างไร</li>
+            </ol>
+        </section>
+
+        <!-- เนื้อหาส่วนที่ 5: ข้อบกพร่องระบบเก่า -->
+        <section class="mb-8">
+            <h2 class="text-2xl sm:text-3xl font-semibold text-blue-600 mt-8 mb-4 pb-2 border-b border-gray-300 flex items-center">
+                <!-- Icon: Exclamation Triangle -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 sm:w-8 sm:h-8 mr-3 text-red-500">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                </svg>
+                ข้อบกพร่องของระบบเก่า
+            </h2>
+            <p class="mb-4 text-base sm:text-lg">
+                สาเหตุที่มักนำไปสู่การพัฒนาระบบใหม่ เกิดจากข้อบกพร่องของระบบเดิม ซึ่งไม่สามารถตอบสนองต่อการเปลี่ยนแปลงได้ ปัญหาหลักๆ ได้แก่:
+            </p>
+
+            <!-- (ใหม่) แผนผังย่อย: ข้อบกพร่อง -->
+            <div class="w-full overflow-x-auto p-4 bg-gray-50 rounded-lg shadow-inner my-6">
+                <svg viewBox="0 0 400 320" class="min-w-full h-auto" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <marker id="arrowhead4" markerWidth="10" markerHeight="7" 
+                        refX="10" refY="3.5" orient="auto">
+                          <polygon points="0 0, 10 3.5, 0 7" fill="#718096" />
+                        </marker>
+                    </defs>
+            
+                    <!-- Node 1: Main Title -->
+                    <g transform="translate(200, 40)">
+                        <rect class="flow-node" width="160" height="40" x="-80" y="-20" style="fill: #fff5f5; stroke: #feb2b2;"></rect>
+                        <text class="flow-text" x="0" y="0" style="fill: #c53030;">ข้อบกพร่องระบบเก่า</text>
+                    </g>
+            
+                    <!-- Node 2: Requirements -->
+                    <g transform="translate(80, 140)">
+                        <rect class="flow-node" width="120" height="40" x="-60" y="-20" style="fill: #fff5f5; stroke: #feb2b2;"></rect>
+                        <text class="flow-text" x="0" y="0" style="fill: #c53030;">ด้านความต้องการ</text>
+                    </g>
+                    
+                    <!-- Node 3: Strategy -->
+                    <g transform="translate(320, 140)">
+                        <rect class="flow-node" width="120" height="40" x="-60" y="-20" style="fill: #fff5f5; stroke: #feb2b2;"></rect>
+                        <text class="flow-text" x="0" y="0" style="font-size: 10px; fill: #c53030;">ด้านกลยุทธ์/ธุรกิจ</text>
+                    </g>
+                    
+                    <!-- Node 4: Technical -->
+                    <g transform="translate(80, 240)">
+                        <rect class="flow-node" width="120" height="40" x="-60" y="-20" style="fill: #fff5f5; stroke: #feb2b2;"></rect>
+                        <text class="flow-text" x="0" y="0" style="font-size: 10px; fill: #c53030;">ด้านเทคนิค/เทคโนโลยี</text>
+                    </g>
+                    
+                    <!-- Node 5: Usability/Security -->
+                    <g transform="translate(320, 240)">
+                        <rect class="flow-node" width="120" height="40" x="-60" y="-20" style="fill: #fff5f5; stroke: #feb2b2;"></rect>
+                        <text class="flow-text" x="0" y="0" style="font-size: 9px; fill: #c53030;">ด้านใช้งาน/ความปลอดภัย</text>
+                    </g>
+            
+                    <!-- Arrows from Main -->
+                    <path d="M 200 60 Q 140 80, 80 120" class="flow-arrow" style="marker-end: url(#arrowhead4);" fill="none"></path>
+                    <path d="M 200 60 Q 260 80, 320 120" class="flow-arrow" style="marker-end: url(#arrowhead4);" fill="none"></path>
+                    <path d="M 200 60 Q 130 140, 80 220" class="flow-arrow" style="marker-end: url(#arrowhead4);" fill="none"></path>
+                    <path d="M 200 60 Q 270 140, 320 220" class="flow-arrow" style="marker-end: url(#arrowhead4);" fill="none"></path>
+                </svg>
+            </div>
+            <!-- (จบส่วนแผนผังย่อย) -->
+
+            <ul class="list-disc list-inside pl-4 space-y-2 text-base sm:text-lg">
+                <li><strong class="font-semibold">ความต้องการ:</strong> ระบบไม่สามารถตอบสนองความต้องการที่แท้จริงของผู้ใช้</li>
+                <li><strong class="font-semibold">กลยุทธ์:</strong> ระบบเก่าไม่สนับสนุนกลยุทธ์การดำเนินงานของธุรกิจในปัจจุบัน</li>
+                <li><strong class="font-semibold">เทคโนโลยี:</strong> เทคโนโลยีที่ใช้ล้าสมัยหรือไม่มีประสิทธิภาพ (เนื้อหาจากหน้า 11)</li>
+                <li><strong class="font-semibold">ความซับซ้อน:</strong> ระบบใช้งานยุ่งยากซับซ้อน (เนื้อหาจากหน้า 11)</li>
+                <li><strong class="font-semibold">ความผิดพลาด:</strong> ระบบมีข้อผิดพลาดบ่อย ทำให้ข้อมูลไม่น่าเชื่อถือ (เนื้อหาจากหน้า 11)</li>
+                <li><strong class="font-semibold">มาตรฐาน:</strong> ขาดมาตรฐานในการทำงานร่วมกัน (เนื้อหาจากหน้า 11)</li>
+                <li><strong class="font-semibold">ความปลอดภัย:</strong> ระบบขาดการป้องกันและความปลอดภัยของข้อมูล (เนื้อหาจากหน้า 11)</li>
+            </ul>
+        </section>
+
+        <!-- เนื้อหาส่วนที่ 6: วิธีการพัฒนาระบบ -->
+        <section class="mb-8">
+            <h2 class="text-2xl sm:text-3xl font-semibold text-blue-600 mt-8 mb-4 pb-2 border-b border-gray-300 flex items-center">
+                <!-- Icon: Rectangle Group (Diagram) -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 sm:w-8 sm:h-8 mr-3 text-blue-500">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125Z" />
+                </svg>
+                วิธีการพัฒนาระบบ
+            </h2>
+            <p class="mb-4 text-base sm:text-lg">การพัฒนาระบบ (System Development) มีแนวทางหลักๆ 2 วิธี คือ:</p>
+
+            <!-- (ใหม่) แผนผังย่อย: วิธีการพัฒนาระบบ -->
+            <div class="w-full overflow-x-auto p-4 bg-gray-50 rounded-lg shadow-inner my-6">
+                <svg viewBox="0 0 400 320" class="min-w-full h-auto" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <marker id="arrowhead5" markerWidth="10" markerHeight="7" 
+                        refX="10" refY="3.5" orient="auto">
+                          <polygon points="0 0, 10 3.5, 0 7" fill="#718096" />
+                        </marker>
+                    </defs>
+            
+                    <!-- Node 1: Main Title -->
+                    <g transform="translate(200, 40)">
+                        <rect class="flow-node" width="160" height="40" x="-80" y="-20"></rect>
+                        <text class="flow-text" x="0" y="0">วิธีการพัฒนาระบบ</text>
+                    </g>
+            
+                    <!-- Node 2: Structured -->
+                    <g transform="translate(80, 140)">
+                        <rect class="flow-node" width="120" height="40" x="-60" y="-20" style="fill: #f0fff4; stroke: #9ae6b4;"></rect>
+                        <text class="flow-text" x="0" y="0" style="font-size: 10px; fill: #2f855a;">1. เชิงโครงสร้าง</text>
+                    </g>
+                    
+                    <!-- Node 3: Object-Oriented -->
+                    <g transform="translate(320, 140)">
+                        <rect class="flow-node" width="120" height="40" x="-60" y="-20" style="fill: #f0fff4; stroke: #9ae6b4;"></rect>
+                        <text class="flow-text" x="0" y="0" style="font-size: 10px; fill: #2f855a;">2. เชิงวัตถุ (OOA)</text>
+                    </g>
+                    
+                    <!-- Node 4: SDLC -->
+                    <g transform="translate(80, 240)">
+                        <rect class="flow-node" width="120" height="40" x="-60" y="-20" style="fill: #fafafa; stroke: #e2e8f0;"></rect>
+                        <text class="flow-text" x="0" y="0" style="font-size: 10px; fill: #4a5568;">(SDLC: วงจร 5 ระยะ)</text>
+                    </g>
+                    
+                    <!-- Node 5: Objects -->
+                    <g transform="translate(320, 240)">
+                        <rect class="flow-node" width="120" height="40" x="-60" y="-20" style="fill: #fafafa; stroke: #e2e8f0;"></rect>
+                        <text class="flow-text" x="0" y="0" style="font-size: 9px; fill: #4a5568;">(มองเป็น 'วัตถุ')</text>
+                    </g>
+            
+                    <!-- Arrows from Main -->
+                    <path d="M 200 60 Q 140 80, 80 120" class="flow-arrow" style="marker-end: url(#arrowhead5);" fill="none"></path>
+                    <path d="M 200 60 Q 260 80, 320 120" class="flow-arrow" style="marker-end: url(#arrowhead5);" fill="none"></path>
+                    
+                    <!-- Sub-Arrows -->
+                    <path d="M 80 160 V 220" class="flow-arrow" style="marker-end: url(#arrowhead5);" fill="none"></path>
+                    <path d="M 320 160 V 220" class="flow-arrow" style="marker-end: url(#arrowhead5);" fill="none"></path>
+                </svg>
+            </div>
+            <!-- (จบส่วนแผนผังย่อย) -->
+
+            <ol class="list-decimal list-inside pl-4 space-y-3 text-base sm:text-lg">
+                <li>
+                    <strong class="font-semibold">การวิเคราะห์เชิงโครงสร้าง (Structured Analysis):</strong>
+                    <p class="pl-2">เป็นเทคนิคดั้งเดิมที่ใช้การพัฒนาระบบแบบเป็นลำดับขั้นตอน หรือที่เรียกว่า <strong class="font-semibold">วงจรการพัฒนาระบบ (System Development Life Cycle: SDLC)</strong> ซึ่งประกอบด้วย 5 ระยะ [cite: 215-220]:</p>
+                    <ul class="list-disc list-inside pl-8 mt-2 space-y-1">
+                        <li>ระยะที่ 1: การวางแผนระบบ (Systems Planning)</li>
+                        <li>ระยะที่ 2: การวิเคราะห์ระบบ (Systems Analysis)</li>
+                        <li>ระยะที่ 3: การออกแบบระบบ (Systems Design)</li>
+                        <li>ระยะที่ 4: การปรับใช้ระบบ (Systems Implementation)</li>
+                        <li>ระยะที่ 5: การบำรุงรักษาระบบ (Systems Maintenance)</li>
+                    </ul>
+                </li>
+                <li>
+                    <strong class="font-semibold">การวิเคราะห์เชิงวัตถุ (Object-Oriented Analysis: OOA):</strong>
+                    <p class="pl-2">เป็นแนวคิดที่มองระบบเป็นกลุ่มของ "วัตถุ (Objects)" โดยแต่ละวัตถุจะมีคุณสมบัติ (Attributes) และวิธีการ (Methods) ของตัวเอง แนวคิดนี้ช่วยในการนำโปรแกรมกลับมาใช้ใหม่ (Reusable) ได้ง่ายขึ้น</p>
+                </li>
+            </ol>
+        </section>
+
+        <!-- เนื้อหาส่วนที่ 7: วิธีพื้นฐานและเครื่องมือ -->
+        <section>
+            <h2 class="text-2xl sm:text-3xl font-semibold text-blue-600 mt-8 mb-4 pb-2 border-b border-gray-300 flex items-center">
+                <!-- Icon: Wrench Screwdriver (Tools) -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 sm:w-8 sm:h-8 mr-3 text-blue-500">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.83-5.83M11.42 15.17l.76-.76M11.42 15.17l-1.59 1.59M15.17 11.42l.76.76M15.17 11.42l-1.59-1.59M11.42 15.17 4.25 22.5M15.17 11.42 22.5 4.25M11.42 15.17.75 4.75M15.17 11.42 4.75 .75M11.42 15.17M15.17 11.42" />
+                </svg>
+                วิธีพื้นฐานและเครื่องมือในการพัฒนาระบบ
+            </h2>
+
+            <!-- วิธีพื้นฐาน -->
+            <h3 class="text-xl sm:text-2xl font-semibold text-cyan-700 mt-8 mb-3 flex items-center">
+                <!-- Icon: Queue List -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 sm:w-7 sm:h-7 mr-3 text-cyan-600">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+                วิธีพื้นฐาน (Basic Approaches)
+            </h3>
+            <p class="mb-4 text-base sm:text-lg">มี 4 วิธีพื้นฐานที่ใช้ในการพัฒนาระบบ:</p>
+            <ol class="list-decimal list-inside pl-4 space-y-2 text-base sm:text-lg">
+                <li><strong class="font-semibold">วิธีเฉพาะเจาะจง (Ad Hoc Approach):</strong> การแก้ปัญหาเฉพาะหน้า ขาดการวางแผนระยะยาว</li>
+                <li><strong class="font-semibold">วิธีสร้างฐานข้อมูล (Database Approach):</strong> เน้นการสร้างฐานข้อมูลส่วนกลางที่สามารถรวบรวมและประมวลผลข้อมูลอย่างเป็นระบบ</li>
+                <li><strong class="font-semibold">วิธีพัฒนาจากล่างขึ้นบน (Bottom-up Approach):</strong> เริ่มจากการพัฒนาระบบงานย่อยๆ ก่อน แล้วจึงนำมารวมกันเป็นระบบใหญ่</li>
+                <li><strong class="font-semibold">วิธีพัฒนาจากบนลงล่าง (Top-down Approach):</strong> เริ่มจากเป้าหมายระดับสูงของผู้บริหาร แล้วจึงแตกย่อยความต้องการลงมาสู่ระบบย่อยๆ</li>
+            </ol>
+
+            <!-- เทคนิคและเครื่องมือ -->
+            <h3 class="text-xl sm:text-2xl font-semibold text-cyan-700 mt-8 mb-3 flex items-center">
+                <!-- Icon: Cog -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 sm:w-7 sm:h-7 mr-3 text-cyan-600">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12a7.5 7.5 0 0 0 15 0m-15 0a7.5 7.5 0 1 1 15 0m-15 0H3m18 0h-1.5m-15 0a7.5 7.5 0 1 1 15 0m-15 0h1.5m15 0h-1.5m-15 0a7.5 7.5 0 1 1 15 0m-15 0H3m18 0h-1.5m-15 0a7.5 7.5 0 1 1 15 0m-15 0h1.5m15 0h-1.5m-15 0a7.5 7.5 0 1 1 15 0m-15 0H3m18 0h-1.5m-15 0a7.5 7.5 0 1 1 15 0m-15 0h1.5m15 0h-1.5m-15 0a7.5 7.5 0 1 1 15 0m-15 0H3m18 0h-1.5m-15 0a7.5 7.5 0 1 1 15 0m-15 0h1.5m15 0h-1.5" />
+                </svg>
+                เทคนิคและเครื่องมือ (Techniques and Tools)
+            </h3>
+            <p class="mb-4 text-base sm:text-lg">นักวิเคราะห์ระบบใช้เทคนิคและเครื่องมือหลายอย่างเพื่อช่วยในการพัฒนาระบบ:</p>
+            <ul class="list-disc list-inside pl-4 space-y-2 text-base sm:text-lg">
+                <li><strong class="font-semibold">การสร้างแบบจำลอง (Modeling):</strong> การใช้แผนภาพเพื่อวิเคราะห์และออกแบบ เช่น แบบจำลองธุรกิจ, แบบจำลองข้อมูล หรือแบบจำลองกระบวนการ</li>
+                <li><strong class="font-semibold">การสร้างต้นแบบ (Prototyping):</strong> การสร้างระบบต้นแบบขึ้นมาเพื่อทดสอบแนวคิดและรับข้อเสนอแนะจากผู้ใช้</li>
+                <li><strong class="font-semibold">เครื่องมือ CASE (Computer-Aided Systems Engineering):</strong> ซอฟต์แวร์ที่ช่วยนักวิเคราะห์ระบบในขั้นตอนต่างๆ</li>
+                <li><strong class="font-semibold">การออกแบบระบบร่วมกัน (Joint Application Design: JAD):</strong> เทคนิคการประชุมเชิงปฏิบัติการที่นำผู้ใช้และทีมพัฒนามาทำงานร่วมกัน</li>
+                <li><strong class="font-semibold">การพัฒนาระบบอย่างรวดเร็ว (Rapid Application Development: RAD):</strong> วิธีการที่มุ่งเน้นการพัฒนาระบบให้เสร็จเร็วขึ้น</li>
+                <li><strong class="font-semibold">เครื่องมืออื่นๆ:</strong> เช่น โปรแกรมประมวลผลคำ (Word Processors) หรือสเปรดชีต (Spread Sheet)</li>
+            </ul>
+        </section>
+
+    </div><!-- จบ Container -->
+
+</body>
+</html>
+
+
+
+
+
+
