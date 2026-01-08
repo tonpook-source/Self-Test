@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เรียนรู้เรื่อง ER Diagram | Interactive Learning</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .diagram-card:hover {
+            transform: translateY(-5px);
+            transition: all 0.3s ease;
+        }
+        .diamond-sm {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #2563eb;
+            transform: rotate(45deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            flex-shrink: 0;
+        }
+        .diamond-sm span {
+            transform: rotate(-45deg);
+            font-size: 9px;
+            font-weight: bold;
+            text-align: center;
+            color: #1e40af;
+            line-height: 1;
+        }
+        .entity-box-sm {
+            width: 100px;
+            height: 45px;
+            border: 2px solid #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .line-h-sm {
+            height: 2px;
+            background: #2563eb;
+            width: 30px;
+            flex-shrink: 0;
+        }
+        /* Game Styles */
+        .game-shape {
+            transition: all 0.3s ease;
+        }
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <span class="text-blue-600 font-bold text-2xl">ER-Learn</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#intro" class="hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">ความหมาย</a>
+                        <a href="#symbols-library" class="hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">คลังสัญลักษณ์</a>
+                        <a href="#primary-key" class="hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Primary Key</a>
+                        <a href="#cardinality" class="hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">ความสัมพันธ์</a>
+                        <a href="#game" class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition">เข้าสู่การทดสอบ (Game)</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="intro" class="bg-blue-600 text-white py-20 px-4">
+        <div class="max-w-4xl mx-auto text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-6">ER Diagram Masterclass</h1>
+            <p class="text-xl opacity-90 leading-relaxed">
+                ยกระดับความรู้เรื่องการออกแบบฐานข้อมูล ตั้งแต่พื้นฐานจนถึงสัญลักษณ์ขั้นสูง 
+                พร้อมตัวอย่างประกอบที่ครอบคลุมทุกกรณี
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+
+        <!-- Symbol Library Section (New: Comprehensive Basic Symbols) -->
+        <section id="symbols-library" class="mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">คลังสัญลักษณ์ที่ใช้ในแผนภาพ (Symbol Reference)</h2>
+                <div class="h-1 w-20 bg-blue-600 mx-auto"></div>
+                <p class="mt-4 text-slate-600">รวบรวมรูปทรงมาตรฐานทั้งหมดที่ต้องรู้สำหรับการเขียน ER Diagram</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Entities Group -->
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                    <h3 class="text-lg font-bold text-blue-600 mb-6 border-b pb-2 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                        เอนทิตี (Entities)
+                    </h3>
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-24 h-12 border-2 border-slate-800 bg-slate-50 flex items-center justify-center font-bold text-[10px]">Entity</div>
+                            <span class="text-xs"><strong>สี่เหลี่ยม:</strong> เอนทิตีปกติ (Strong Entity)</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-24 h-12 border-4 border-slate-800 bg-slate-50 flex items-center justify-center font-bold text-[10px] relative">
+                                <div class="absolute inset-0.5 border border-slate-800"></div>
+                                <span class="relative">Weak Entity</span>
+                            </div>
+                            <span class="text-xs"><strong>สี่เหลี่ยมซ้อน:</strong> เอนทิตีอ่อนแอ</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attributes Group -->
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                    <h3 class="text-lg font-bold text-green-600 mb-6 border-b pb-2 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        คุณสมบัติ (Attributes)
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-24 h-10 border-2 border-slate-800 rounded-[50%] bg-slate-50 flex items-center justify-center font-bold text-[10px]">Attribute</div>
+                            <span class="text-xs"><strong>วงรี:</strong> คุณสมบัติทั่วไป</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-24 h-10 border-2 border-slate-800 rounded-[50%] bg-slate-50 flex items-center justify-center font-bold text-[10px]">
+                                <span class="border-b border-slate-800">Key (PK)</span>
+                            </div>
+                            <span class="text-xs"><strong>วงรีขีดเส้นใต้:</strong> กุญแจหลัก</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-24 h-10 border-4 border-double border-slate-800 rounded-[50%] bg-slate-50 flex items-center justify-center font-bold text-[8px]">Multivalued</div>
+                            <span class="text-xs"><strong>วงรีซ้อน:</strong> มีได้หลายค่า</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-24 h-10 border-2 border-dashed border-slate-800 rounded-[50%] bg-slate-50 flex items-center justify-center font-bold text-[10px]">Derived</div>
+                            <span class="text-xs"><strong>วงรีเส้นประ:</strong> ค่าจากการคำนวณ</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Relationships & Connectors -->
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                    <h3 class="text-lg font-bold text-purple-600 mb-6 border-b pb-2 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                        ความสัมพันธ์ (Links)
+                    </h3>
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 border-2 border-slate-800 rotate-45 bg-slate-50 flex items-center justify-center">
+                                <span class="-rotate-45 font-bold text-[8px]">Relation</span>
+                            </div>
+                            <span class="text-xs"><strong>ข้าวหลามตัด:</strong> ความสัมพันธ์ทั่วไป</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 border-4 border-double border-slate-800 rotate-45 bg-slate-50 flex items-center justify-center relative">
+                                <span class="-rotate-45 font-bold text-[8px]">Identify</span>
+                            </div>
+                            <span class="text-xs"><strong>ข้าวหลามตัดซ้อน:</strong> ความสัมพันธ์ของ Weak Entity</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-24 h-0.5 bg-slate-800"></div>
+                            <span class="text-xs"><strong>เส้นตรง:</strong> เส้นเชื่อมความสัมพันธ์</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Detailed Standard Components Section -->
+        <section id="components" class="mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">ส่วนประกอบพื้นฐานอย่างละเอียด</h2>
+                <div class="h-1 w-20 bg-blue-600 mx-auto"></div>
+                <p class="mt-4 text-slate-600">ทำความเข้าใจโครงสร้างหลัก 3 อย่างที่รวมกันเป็นฐานข้อมูล</p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-12">
+                <!-- Entity Detail -->
+                <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+                    <div class="flex flex-col md:flex-row gap-8">
+                        <div class="md:w-1/3">
+                            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                            </div>
+                            <h3 class="text-2xl font-bold text-slate-900 mb-4">Entity (เอนทิตี)</h3>
+                            <p class="text-slate-600 leading-relaxed">คือ "วัตถุ" หรือ "สิ่งของ" ที่เราสนใจจะจัดเก็บข้อมูลในระบบ เปรียบได้กับคำนาม (Noun)</p>
+                        </div>
+                        <div class="md:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="bg-slate-50 p-5 rounded-xl border-l-4 border-blue-500">
+                                <h4 class="font-bold text-blue-700 mb-2">ตัวอย่าง: สิ่งที่จับต้องได้</h4>
+                                <ul class="text-sm text-slate-600 space-y-1">
+                                    <li>• พนักงาน (Employee)</li>
+                                    <li>• สินค้า (Product)</li>
+                                    <li>• รถยนต์ (Car)</li>
+                                </ul>
+                            </div>
+                            <div class="bg-slate-50 p-5 rounded-xl border-l-4 border-blue-500">
+                                <h4 class="font-bold text-blue-700 mb-2">ตัวอย่าง: สิ่งที่เป็นนามธรรม</h4>
+                                <ul class="text-sm text-slate-600 space-y-1">
+                                    <li>• การสั่งซื้อ (Order)</li>
+                                    <li>• บัญชี (Account)</li>
+                                    <li>• วิชาเรียน (Course)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attribute Detail -->
+                <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+                    <div class="flex flex-col md:flex-row gap-8">
+                        <div class="md:w-1/3">
+                            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center mb-6">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            </div>
+                            <h3 class="text-2xl font-bold text-slate-900 mb-4">Attribute (แอตทริบิวต์)</h3>
+                            <p class="text-slate-600 leading-relaxed">คือ "คุณสมบัติ" หรือรายละเอียดที่อธิบายลักษณะของ Entity</p>
+                        </div>
+                        <div class="md:w-2/3 space-y-4">
+                            <div class="bg-slate-50 p-5 rounded-xl">
+                                <h4 class="font-bold text-green-700 mb-2">ประเภทของ Attribute ที่สำคัญ:</h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                                    <div>
+                                        <p class="font-semibold text-slate-800">1. Key Attribute (PK)</p>
+                                        <p class="text-slate-500">ใช้ระบุตัวตนห้ามซ้ำ เช่น รหัสพนักงาน</p>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-slate-800">2. Simple Attribute</p>
+                                        <p class="text-slate-500">ค่าเดี่ยวๆ ไม่แยกย่อย เช่น เพศ, ราคา</p>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-slate-800">3. Composite Attribute</p>
+                                        <p class="text-slate-500">ค่าที่แยกย่อยได้ เช่น ที่อยู่ (บ้านเลขที่, ถนน, จังหวัด)</p>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-slate-800">4. Multivalued Attribute</p>
+                                        <p class="text-slate-500">หนึ่งคนมีได้หลายค่า เช่น เบอร์โทรศัพท์, ทักษะ</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Relationship Detail -->
+                <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+                    <div class="flex flex-col md:flex-row gap-8">
+                        <div class="md:w-1/3">
+                            <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-6">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                            </div>
+                            <h3 class="text-2xl font-bold text-slate-900 mb-4">Relationship (ความสัมพันธ์)</h3>
+                            <p class="text-slate-600 leading-relaxed">คือ "ความเชื่อมโยง" ระหว่าง Entity ต่างๆ เปรียบได้กับคำกริยา (Verb)</p>
+                        </div>
+                        <div class="md:w-2/3">
+                            <div class="bg-slate-50 p-6 rounded-xl">
+                                <h4 class="font-bold text-purple-700 mb-4 text-center">ตัวอย่างการสร้างประโยคความสัมพันธ์</h4>
+                                <div class="flex flex-wrap items-center justify-center gap-4 text-sm">
+                                    <div class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-sm">Entity: นักเรียน</div>
+                                    <div class="text-slate-400">---</div>
+                                    <div class="px-4 py-2 border-2 border-purple-400 text-purple-700 font-bold rounded-lg bg-white">ลงทะเบียน</div>
+                                    <div class="text-slate-400">---</div>
+                                    <div class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-sm">Entity: วิชาเรียน</div>
+                                </div>
+                                <p class="mt-6 text-xs text-center text-slate-500 italic">ความหมาย: นักเรียนแต่ละคนมีความเกี่ยวข้องกับการเลือกเรียนในวิชาต่างๆ</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Primary Key Section -->
+        <section id="primary-key" class="mb-24 bg-amber-50 rounded-[3rem] p-8 md:p-16 border border-amber-100">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex flex-col md:flex-row items-center gap-12">
+                    <div class="md:w-1/2">
+                        <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                            </svg>
+                        </div>
+                        <h2 class="text-3xl font-bold text-slate-900 mb-4">Primary Key (กุญแจหลัก)</h2>
+                        <p class="text-slate-600 mb-6 leading-relaxed">
+                            คือ แอตทริบิวต์พิเศษที่ใช้ <strong>ระบุตัวตน (Unique Identification)</strong> ของข้อมูลในเอนทิตีนั้นๆ ไม่ให้ซ้ำซ้อนกันเลยแม้แต่รายการเดียว
+                        </p>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3 text-slate-700">
+                                <span class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs">✓</span>
+                                <span>ต้องมีค่าไม่ซ้ำกัน (Unique Value)</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-slate-700">
+                                <span class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs">✓</span>
+                                <span>ห้ามเป็นค่าว่าง (Not Null)</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-slate-700">
+                                <span class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs">✓</span>
+                                <span>1 เอนทิตี ต้องมี Primary Key อย่างน้อย 1 ชุด</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 text-center">
+                        <div class="bg-white p-8 rounded-3xl shadow-md border border-amber-100 inline-block w-full max-w-sm">
+                            <p class="text-xs text-amber-600 font-bold mb-4 uppercase tracking-widest">สัญลักษณ์ในแผนภาพ</p>
+                            <div class="w-48 h-20 border-2 border-amber-500 rounded-[50%] flex items-center justify-center mx-auto mb-4 bg-amber-50/30">
+                                <span class="font-bold border-b-2 border-amber-600 pb-1">รหัสพนักงาน</span>
+                            </div>
+                            <p class="text-xs text-slate-500 italic">"วงรีพร้อมการขีดเส้นใต้ที่ชื่อแอตทริบิวต์"</p>
+                        </div>
+                        <div class="mt-8 grid grid-cols-2 gap-4">
+                            <div class="bg-white p-4 rounded-xl shadow-sm text-sm">
+                                <span class="block font-bold text-amber-600">ID Card</span>
+                                <span class="text-slate-500 text-xs">ระบุตัวตนบุคคล</span>
+                            </div>
+                            <div class="bg-white p-4 rounded-xl shadow-sm text-sm">
+                                <span class="block font-bold text-amber-600">Product SKUs</span>
+                                <span class="text-slate-500 text-xs">แยกแยะชนิดสินค้า</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advanced Symbols Study Guide -->
+        <section id="advanced-symbols" class="mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">สัญลักษณ์พิเศษ (Advanced Symbols)</h2>
+                <p class="text-slate-500">หัวข้อเหล่านี้มักปรากฏในข้อสอบและเกมทดสอบความสามารถ</p>
+                <div class="h-1 w-20 bg-blue-600 mx-auto mt-4"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Weak Entity -->
+                <div class="bg-blue-50 border border-blue-200 p-6 rounded-2xl text-center">
+                    <div class="w-24 h-14 bg-white border-4 border-blue-600 rounded shadow-sm mx-auto mb-4 relative">
+                        <div class="absolute inset-1 border border-blue-600"></div>
+                    </div>
+                    <h4 class="font-bold text-blue-800">Weak Entity</h4>
+                    <p class="text-xs text-slate-600 mt-2">เอนทิตีที่ต้องพึ่งพาเอนทิตีอื่น (สี่เหลี่ยมซ้อน)</p>
+                </div>
+                <!-- Multivalued Attribute -->
+                <div class="bg-green-50 border border-green-200 p-6 rounded-2xl text-center">
+                    <div class="w-24 h-14 bg-white border-4 border-green-600 rounded-[50%] shadow-sm mx-auto mb-4 relative">
+                        <div class="absolute inset-1 border border-green-600 rounded-[50%]"></div>
+                    </div>
+                    <h4 class="font-bold text-green-800">Multivalued Attribute</h4>
+                    <p class="text-xs text-slate-600 mt-2">คุณสมบัติที่มีได้หลายค่า เช่น เบอร์โทร (วงรีซ้อน)</p>
+                </div>
+                <!-- Derived Attribute -->
+                <div class="bg-yellow-50 border border-yellow-200 p-6 rounded-2xl text-center">
+                    <div class="w-24 h-14 bg-white border-2 border-dashed border-yellow-600 rounded-[50%] shadow-sm mx-auto mb-4"></div>
+                    <h4 class="font-bold text-yellow-800">Derived Attribute</h4>
+                    <p class="text-xs text-slate-600 mt-2">ค่าที่คำนวณมาจากค่าอื่น เช่น อายุ (วงรีเส้นประ)</p>
+                </div>
+                <!-- Identifying Relationship -->
+                <div class="bg-purple-50 border border-purple-200 p-6 rounded-2xl text-center">
+                    <div class="w-16 h-16 bg-white border-4 border-purple-600 rotate-45 mx-auto mb-6 relative shadow-sm">
+                        <div class="absolute inset-1 border border-purple-600"></div>
+                    </div>
+                    <h4 class="font-bold text-purple-800">Identifying Relationship</h4>
+                    <p class="text-xs text-slate-600 mt-2">ความสัมพันธ์ของ Weak Entity (ข้าวหลามตัดซ้อน)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cardinality Concept Section with Visual Diagrams -->
+        <section id="cardinality" class="mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">ตัวอย่าง Cardinality ในชีวิตจริง</h2>
+                <div class="h-1 w-20 bg-blue-600 mx-auto mb-6"></div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-8">
+                <!-- Example 1:1 -->
+                <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col lg:flex-row items-center gap-10">
+                    <div class="lg:w-1/3">
+                        <div class="inline-block bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold mb-3 tracking-widest uppercase">Type 1:1</div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">One-to-One (ตัวต่อตัว)</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed italic">คน 1 คน กับพาสปอร์ต 1 เล่ม (ห้ามมีซ้ำและห้ามใช้ร่วมกัน)</p>
+                    </div>
+                    <div class="lg:w-2/3 w-full bg-slate-50 p-6 rounded-2xl overflow-x-auto flex justify-center items-center">
+                        <div class="flex items-center min-w-[320px]">
+                            <div class="text-center">
+                                <div class="entity-box-sm mx-auto">คน (Person)</div>
+                                <span class="text-blue-600 font-bold text-lg">1</span>
+                            </div>
+                            <div class="line-h-sm"></div>
+                            <div class="diamond-sm"><span>ถือครอง (Holds)</span></div>
+                            <div class="line-h-sm"></div>
+                            <div class="text-center">
+                                <div class="entity-box-sm mx-auto">พาสปอร์ต</div>
+                                <span class="text-blue-600 font-bold text-lg">1</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Example 1:N -->
+                <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col lg:flex-row items-center gap-10">
+                    <div class="lg:w-1/3">
+                        <div class="inline-block bg-green-600 text-white px-3 py-1 rounded-full text-xs font-bold mb-3 tracking-widest uppercase">Type 1:N</div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">One-to-Many (หนึ่งต่อกลุ่ม)</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed italic">แม่ 1 คน กับลูกหลายคน (ลูก 1 คนมีแม่ได้คนเดียว แต่แม่ 1 คนมีลูกได้หลายคน)</p>
+                    </div>
+                    <div class="lg:w-2/3 w-full bg-slate-50 p-6 rounded-2xl overflow-x-auto flex justify-center items-center">
+                        <div class="flex items-center min-w-[320px]">
+                            <div class="text-center">
+                                <div class="entity-box-sm mx-auto">แม่ (Mother)</div>
+                                <span class="text-green-600 font-bold text-lg">1</span>
+                            </div>
+                            <div class="line-h-sm"></div>
+                            <div class="diamond-sm"><span>ให้กำเนิด</span></div>
+                            <div class="line-h-sm"></div>
+                            <div class="text-center">
+                                <div class="entity-box-sm mx-auto">ลูก (Child)</div>
+                                <span class="text-green-600 font-bold text-lg">N</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Example M:N -->
+                <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col lg:flex-row items-center gap-10">
+                    <div class="lg:w-1/3">
+                        <div class="inline-block bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-bold mb-3 tracking-widest uppercase">Type M:N</div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">Many-to-Many (กลุ่มต่อกลุ่ม)</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed italic">ภาพยนตร์หลายเรื่อง กับนักแสดงหลายคน (นักแสดง 1 คนเล่นได้หลายเรื่อง และหนัง 1 เรื่องมีหลายนักแสดง)</p>
+                    </div>
+                    <div class="lg:w-2/3 w-full bg-slate-50 p-6 rounded-2xl overflow-x-auto flex justify-center items-center">
+                        <div class="flex items-center min-w-[320px]">
+                            <div class="text-center">
+                                <div class="entity-box-sm mx-auto">ภาพยนตร์</div>
+                                <span class="text-purple-600 font-bold text-lg">M</span>
+                            </div>
+                            <div class="line-h-sm"></div>
+                            <div class="diamond-sm"><span>แสดงโดย</span></div>
+                            <div class="line-h-sm"></div>
+                            <div class="text-center">
+                                <div class="entity-box-sm mx-auto">นักแสดง</div>
+                                <span class="text-purple-600 font-bold text-lg">N</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Mini Game (20 Questions) -->
+        <section id="game" class="mb-24">
+            <div class="bg-gradient-to-br from-slate-900 to-blue-900 rounded-[3rem] p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+                    <div class="grid grid-cols-6 gap-4 transform rotate-12 -translate-y-20">
+                        <div class="w-20 h-20 border border-white rounded-full"></div>
+                        <div class="w-32 h-16 border border-white"></div>
+                        <div class="w-24 h-24 border border-white rotate-45"></div>
+                    </div>
+                </div>
+                
+                <div class="relative z-10 max-w-3xl mx-auto text-center">
+                    <h2 class="text-3xl font-bold mb-4">Database Designer Challenge</h2>
+                    <p class="text-blue-200 mb-8 text-lg">ทดสอบความเป็นมืออาชีพด้วยคำถาม 20 ข้อ (สะสมคะแนนเต็ม 100)</p>
+                    
+                    <div id="game-board" class="bg-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/10 min-h-[450px] flex flex-col items-center justify-center shadow-inner">
+                        <div id="game-intro">
+                            <div class="text-6xl mb-6">🚀</div>
+                            <h3 class="text-2xl font-bold mb-4">พร้อมสำหรับการทดสอบระดับสูงหรือยัง?</h3>
+                            <p class="text-sm text-blue-200 mb-6 px-4 italic">"ทริค: สังเกตเส้นประและเส้นซ้อนให้ดี มันคือคีย์เวิร์ดของคะแนน!"</p>
+                            <button onclick="startGame()" class="bg-blue-500 text-white font-bold py-4 px-12 rounded-full shadow-lg hover:bg-blue-400 transition transform hover:scale-105 active:scale-95">
+                                เริ่มเกมเดี๋ยวนี้
+                            </button>
+                        </div>
+
+                        <div id="game-play" class="hidden w-full">
+                            <div class="flex justify-between items-center mb-6">
+                                <span id="game-level" class="bg-blue-500/30 px-3 py-1 rounded-full text-xs font-bold border border-blue-400/30 tracking-widest">PROGRESS: 1/20</span>
+                                <span id="game-score" class="text-yellow-400 font-bold">SCORE: 0</span>
+                            </div>
+                            
+                            <div id="visual-challenge" class="flex justify-center items-center h-48 mb-8 bg-black/20 rounded-xl border border-white/5 shadow-inner">
+                                <!-- Shapes rendered here -->
+                            </div>
+                            
+                            <div id="game-options" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <!-- Options rendered here -->
+                            </div>
+                        </div>
+
+                        <div id="game-over" class="hidden">
+                            <div class="text-7xl mb-6 animate-bounce" id="over-emoji">🎯</div>
+                            <h3 class="text-3xl font-bold mb-2">จบการทดสอบ!</h3>
+                            <p id="final-score-text" class="text-xl text-blue-100 mb-8">คุณได้คะแนน...</p>
+                            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                                <button onclick="startGame()" class="bg-blue-500 text-white font-bold py-3 px-10 rounded-full hover:bg-blue-400 transition">
+                                    ลองอีกครั้ง
+                                </button>
+                                <a href="#intro" class="bg-white/10 text-white font-bold py-3 px-10 rounded-full hover:bg-white/20 transition">
+                                    ทบทวนเนื้อหา
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tips for Learners -->
+        <section class="mb-20 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-indigo-900 text-white p-8 rounded-3xl">
+                <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                    <span>💡</span> ทริคการออกแบบ ER Diagram
+                </h3>
+                <ul class="space-y-3 text-sm text-indigo-100">
+                    <li class="flex items-start gap-2"><span>•</span> พยายามตั้งชื่อ Entity เป็นคำนามเอกพจน์ (เช่น Student ไม่ใช่ Students)</li>
+                    <li class="flex items-start gap-2"><span>•</span> Attribute ควรเป็นค่าที่เล็กที่สุด (Atomic Value) ไม่ควรเก็บข้อมูลชุดใหญ่ในช่องเดียว</li>
+                    <li class="flex items-start gap-2"><span>•</span> หลีกเลี่ยงความสัมพันธ์แบบ M:N ในระดับตาราง (ควรใช้ตารางกลางช่วย)</li>
+                </ul>
+            </div>
+            <div class="bg-emerald-800 text-white p-8 rounded-3xl">
+                <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                    <span>📈</span> ประโยชน์ของความสัมพันธ์
+                </h3>
+                <p class="text-sm text-emerald-100 leading-relaxed">
+                    การกำหนด Cardinality (1:1, 1:N, M:N) ที่ถูกต้อง จะช่วยให้การทำ <strong>Database Normalization</strong> ง่ายขึ้นมาก 
+                    ซึ่งจะส่งผลให้ฐานข้อมูลทำงานได้รวดเร็วและไม่เกิดข้อผิดพลาดเมื่อมีการลบหรือแก้ไขข้อมูลในอนาคต
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-50 border-t border-slate-200 py-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-slate-500 text-sm">© 2024 Interactive Learning Resource - อ้างอิงเนื้อหาจาก ClickNext Blog</p>
+        </div>
+    </footer>
+
+    <script>
+        const gameQuestions = [
+            { content: '<div class="w-40 h-24 border-4 border-white flex items-center justify-center font-bold text-xl bg-white/10">EMPLOYEE</div>', options: ['Entity', 'Attribute', 'Relationship', 'Primary Key'], correct: 0 },
+            { content: '<div class="w-40 h-24 border-4 border-white rounded-[50%] flex items-center justify-center font-bold text-xl bg-white/10">SALARY</div>', options: ['Entity', 'Attribute', 'Relationship', 'Line'], correct: 1 },
+            { content: '<div class="w-24 h-24 border-4 border-white rotate-45 flex items-center justify-center bg-white/10"><span class="-rotate-45 font-bold">MANAGES</span></div>', options: ['Entity', 'Attribute', 'Relationship', 'Cardinality'], correct: 2 },
+            { content: '<div class="text-5xl font-bold tracking-widest text-blue-300">1 : N</div>', options: ['One-to-One', 'One-to-Many', 'Many-to-Many', 'Zero-to-One'], correct: 1 },
+            { content: '<div class="text-center"><div class="w-32 h-20 border-4 border-white rounded-[50%] flex flex-col items-center justify-center px-2 bg-white/10"><span class="font-bold border-b-2 border-white">USER_ID</span></div></div>', options: ['Composite Attribute', 'Entity', 'Primary Key Attribute', 'Weak Entity'], correct: 2 },
+            { content: '<div class="text-3xl font-bold">"CUSTOMER"</div>', options: ['Entity', 'Attribute', 'Relationship', 'Line'], correct: 0 },
+            { content: '<div class="text-3xl font-bold">"PROVIDES"</div>', options: ['Entity', 'Attribute', 'Relationship', 'Key'], correct: 2 },
+            { content: '<div class="text-5xl font-bold text-pink-300">M : N</div>', options: ['1:1', '1:N', 'N:1', 'Many-to-Many'], correct: 3 },
+            { content: '<div class="w-40 h-24 border-4 border-white flex items-center justify-center relative bg-white/10"><div class="absolute inset-1 border-2 border-white"></div><span class="font-bold">DEPENDENT</span></div>', options: ['Strong Entity', 'Weak Entity', 'Relationship', 'Multivalued'], correct: 1 },
+            { content: '<div class="w-40 h-24 border-4 border-white rounded-[50%] flex items-center justify-center relative bg-white/10"><div class="absolute inset-1 border-2 border-white rounded-[50%]"></div><span class="font-bold text-xs">PHONES</span></div>', options: ['Derived Attribute', 'Simple Attribute', 'Multivalued Attribute', 'Key Attribute'], correct: 2 },
+            { content: '<div class="w-40 h-24 border-4 border-white rounded-[50%] border-dashed flex items-center justify-center bg-white/10"><span class="font-bold">AGE</span></div>', options: ['Derived Attribute', 'Simple Attribute', 'Weak Entity', 'Relationship'], correct: 0 },
+            { content: '<div class="text-3xl font-bold">--- (Line) ---</div>', options: ['Connect Components', 'Define Entity', 'Define Attribute', 'Primary Key'], correct: 0 },
+            { content: '<div class="text-xl font-bold text-center px-4">"หนึ่งแผนกมีพนักงานได้หลายคน"</div>', options: ['1:1', '1:N', 'M:N', 'N:M'], correct: 1 },
+            { content: '<div class="text-xl font-bold text-center px-4">"นักเรียน 1 คนมีเลขประจำตัว 1 เลข"</div>', options: ['1:1', '1:N', 'M:N', '0:N'], correct: 0 },
+            { content: '<div class="text-xl font-bold text-center px-4">"Normalization" ช่วยเรื่องใด?</div>', options: ['Data Redundancy', 'Slow Access', 'Easy Coding', 'No SQL'], correct: 0 },
+            { content: '<div class="text-xl font-bold text-center px-4">ER Diagram อยู่ในเฟสใด?</div>', options: ['Implementation', 'Design', 'Testing', 'Planning'], correct: 1 },
+            { content: '<div class="text-xl font-bold text-center px-4">"ADDRESS" ของพนักงานคือ?</div>', options: ['Entity', 'Attribute', 'Relationship', 'Cardinality'], correct: 1 },
+            { content: '<div class="text-xl font-bold text-center px-4">Primary Key ต้องมีค่าอย่างไร?</div>', options: ['Duplicate allowed', 'Can be NULL', 'Unique & Not NULL', 'Only numbers'], correct: 2 },
+            { content: '<div class="text-xl font-bold text-center px-4">"ENROLLS" คือองค์ประกอบใด?</div>', options: ['Entity', 'Attribute', 'Relationship', 'Key'], correct: 2 },
+            { content: '<div class="w-24 h-24 border-4 border-white rotate-45 flex items-center justify-center relative bg-white/10"><div class="absolute inset-1 border-2 border-white"></div><span class="-rotate-45 font-bold text-[8px] text-center">ID RELATION</span></div>', options: ['Identifying Relation', 'Strong Relation', 'Weak Attribute', 'Derived Entity'], correct: 0 }
+        ];
+
+        let currentQIndex = 0;
+        let score = 0;
+
+        const introScreen = document.getElementById('game-intro');
+        const playScreen = document.getElementById('game-play');
+        const overScreen = document.getElementById('game-over');
+        const visualChallenge = document.getElementById('visual-challenge');
+        const optionsContainer = document.getElementById('game-options');
+        const scoreDisplay = document.getElementById('game-score');
+        const levelDisplay = document.getElementById('game-level');
+        const finalScoreText = document.getElementById('final-score-text');
+        const overEmoji = document.getElementById('over-emoji');
+
+        function startGame() {
+            currentQIndex = 0;
+            score = 0;
+            introScreen.classList.add('hidden');
+            overScreen.classList.add('hidden');
+            playScreen.classList.remove('hidden');
+            updateScore();
+            loadNextQuestion();
+        }
+
+        function loadNextQuestion() {
+            const question = gameQuestions[currentQIndex];
+            levelDisplay.innerText = `PROGRESS: ${currentQIndex + 1}/${gameQuestions.length}`;
+            visualChallenge.innerHTML = question.content;
+            
+            optionsContainer.innerHTML = '';
+            question.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.innerText = opt;
+                btn.className = "bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold py-4 px-6 rounded-xl transition transform active:scale-95 text-sm";
+                btn.onclick = () => checkAnswer(idx, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIdx, btnElement) {
+            const question = gameQuestions[currentQIndex];
+            const buttons = optionsContainer.querySelectorAll('button');
+            
+            buttons.forEach(b => b.disabled = true);
+
+            if (selectedIdx === question.correct) {
+                btnElement.classList.remove('bg-white/10');
+                btnElement.classList.add('bg-emerald-500/80', 'border-emerald-400');
+                score += 5;
+                updateScore();
+            } else {
+                btnElement.classList.remove('bg-white/10');
+                btnElement.classList.add('bg-rose-500/80', 'border-rose-400', 'shake');
+                buttons[question.correct].classList.add('bg-emerald-500/40', 'border-emerald-400');
+            }
+
+            setTimeout(() => {
+                currentQIndex++;
+                if (currentQIndex < gameQuestions.length) {
+                    loadNextQuestion();
+                } else {
+                    endGame();
+                }
+            }, 800);
+        }
+
+        function updateScore() {
+            scoreDisplay.innerText = `SCORE: ${score}`;
+        }
+
+        function endGame() {
+            playScreen.classList.add('hidden');
+            overScreen.classList.remove('hidden');
+            finalScoreText.innerText = `คุณทำได้ ${score} คะแนนจาก 100 คะแนน!`;
+            
+            if (score >= 90) {
+                overEmoji.innerText = "👑";
+                finalScoreText.innerText += " (ระดับเทพ!)";
+            } else if (score >= 70) {
+                overEmoji.innerText = "🏆";
+                finalScoreText.innerText += " (เก่งมาก!)";
+            } else if (score >= 50) {
+                overEmoji.innerText = "⭐";
+                finalScoreText.innerText += " (ผ่านเกณฑ์)";
+            } else {
+                overEmoji.innerText = "📚";
+                finalScoreText.innerText += " (ควรทบทวนอีกนิด)";
+            }
+        }
+    </script>
+</body>
+</html>
