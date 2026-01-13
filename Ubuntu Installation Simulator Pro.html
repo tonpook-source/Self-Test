@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubuntu 24.04 LTS Installation Simulator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans Thai', sans-serif;
+            background-color: #111;
+        }
+
+        .ubuntu-gradient {
+            background: linear-gradient(135deg, #4b1432 0%, #1c0815 100%);
+        }
+
+        .install-gradient {
+            background: linear-gradient(135deg, #772953 0%, #300a24 100%);
+        }
+
+        .step-active {
+            color: #e95420;
+            font-weight: 700;
+        }
+
+        .step-inactive {
+            color: #9ca3af;
+        }
+
+        /* Animation */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Custom Radio Style */
+        input[type="radio"]:checked {
+            border-color: #e95420;
+            background-color: #e95420;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-0 sm:p-4">
+    <!-- Background Wallpaper -->
+    <div class="fixed inset-0 ubuntu-gradient pointer-events-none overflow-hidden">
+        <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-orange-500 opacity-[0.03] rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
+        <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-500 opacity-[0.05] rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4"></div>
+    </div>
+
+    <!-- Main Window -->
+    <div id="main-window" class="relative w-full max-w-6xl h-full sm:h-[700px] bg-white bg-opacity-[0.98] shadow-2xl overflow-hidden flex flex-col sm:flex-row sm:rounded-[32px] border border-white border-opacity-20 z-10">
+        
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-neutral-100 border-r border-gray-200 p-6 hidden md:block">
+            <div class="flex items-center gap-2 mb-10">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/App_Center_Icon_Ubuntu_23.10.svg" class="w-6 h-6" alt="Ubuntu Logo">
+                <span class="font-bold text-gray-700 uppercase tracking-tighter">Ubuntu Installer</span>
+            </div>
+            <div id="step-list" class="space-y-4"></div>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 md:p-12 flex flex-col relative">
+            <div id="window-decor" class="absolute top-4 right-6 flex gap-2">
+                <div class="w-3 h-3 rounded-full bg-gray-200"></div>
+                <div class="w-3 h-3 rounded-full bg-gray-200"></div>
+                <div class="w-3 h-3 rounded-full bg-orange-400"></div>
+            </div>
+
+            <div id="screen-content" class="flex-1 flex flex-col h-full overflow-hidden"></div>
+        </main>
+    </div>
+
+    <script>
+        const state = {
+            step: 0,
+            installProgress: 0,
+            showLogs: false,
+            formData: {
+                name: '',
+                computerName: '',
+                username: '',
+                password: '',
+                confirmPassword: '',
+                installType: 'normal',
+                diskAction: 'erase',
+                loginOption: 'require_pwd' // 'auto' or 'require_pwd'
+            }
+        };
+
+        const steps = ["ต้อนรับ", "ภาษาและคีย์บอร์ด", "การเชื่อมต่อ", "แอปและการอัปเดต", "ประเภทการติดตั้ง", "พาร์ทิชัน", "ตำแหน่งที่ตั้ง", "ข้อมูลผู้ใช้", "ติดตั้ง"];
+        const languages = ["ไทย (Thai)", "English (US)", "日本語", "Français"];
+        const slides = [
+            { title: "ยินดีต้อนรับสู่ Ubuntu 24.04 LTS", desc: "ระบบปฏิบัติการ Noble Numbat มาพร้อมความเสถียรและการสนับสนุนยาวนาน", icon: 'monitor' },
+            { title: "เครื่องมือสำหรับนักพัฒนา", desc: "รองรับ Python, Docker, Rust, Go และเครื่องมือชั้นนำระดับโลก", icon: 'terminal' },
+            { title: "ความบันเทิงไร้ขีดจำกัด", desc: "เพลิดเพลินกับ Steam, VLC และเครื่องมือสร้างสรรค์อย่าง Blender", icon: 'play' },
+            { title: "ความปลอดภัยระดับองค์กร", desc: "ติดตั้งการอัปเดตความปลอดภัยอัตโนมัติ และระบบป้องกัน AppArmor", icon: 'lock' }
+        ];
+
+        function init() {
+            renderSidebar();
+            renderStep();
+        }
+
+        function renderSidebar() {
+            const stepList = document.getElementById('step-list');
+            if (state.step >= 8) {
+                document.getElementById('sidebar').classList.add('hidden');
+                return;
+            }
+            document.getElementById('sidebar').classList.remove('hidden');
+            stepList.innerHTML = steps.map((s, i) => `
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full ${state.step >= i ? 'bg-orange-600' : 'bg-gray-300'}"></div>
+                    <span class="text-sm ${state.step === i ? 'step-active' : 'step-inactive'}">${s}</span>
+                </div>
+            `).join('');
+        }
+
+        function nextStep() {
+            state.step++;
+            renderSidebar();
+            renderStep();
+            if (state.step === 8) startInstallation();
+        }
+
+        function prevStep() {
+            state.step--;
+            renderSidebar();
+            renderStep();
+        }
+
+        function updateFormData(key, value) {
+            state.formData[key] = value;
+            
+            if (state.step === 7) {
+                const isPwdLongEnough = state.formData.password.length >= 6;
+                const isMatching = state.formData.password === state.formData.confirmPassword && isPwdLongEnough;
+                const canNextUser = state.formData.name && state.formData.username && state.formData.computerName && isMatching;
+                
+                // Update UI Feedback for User Info screen without re-rendering the whole screen
+                const nameCheck = document.getElementById('name-check');
+                const computerCheck = document.getElementById('computer-check');
+                const userCheck = document.getElementById('user-check');
+                const pwdCheck = document.getElementById('pwd-check');
+                const confirmCheck = document.getElementById('confirm-check');
+                const nextBtn = document.getElementById('next-btn');
+
+                if (nameCheck) nameCheck.style.opacity = state.formData.name ? "1" : "0";
+                if (computerCheck) computerCheck.style.opacity = state.formData.computerName ? "1" : "0";
+                if (userCheck) userCheck.style.opacity = state.formData.username ? "1" : "0";
+                if (pwdCheck) pwdCheck.style.opacity = isPwdLongEnough ? "1" : "0";
+                if (confirmCheck) confirmCheck.style.opacity = isMatching ? "1" : "0";
+
+                if (nextBtn) {
+                    nextBtn.disabled = !canNextUser;
+                    if (!canNextUser) {
+                        nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+                }
+            }
+        }
+
+        function renderStep() {
+            const container = document.getElementById('screen-content');
+            document.getElementById('window-decor').style.display = state.step >= 8 ? 'none' : 'flex';
+
+            const header = (title, subtitle) => `<div class="mb-6 fade-in"><h2 class="text-2xl font-bold text-gray-900 leading-tight">${title}</h2><p class="text-gray-500 mt-1">${subtitle}</p></div>`;
+            const footer = (canNext = true) => `
+                <div class="flex justify-between mt-auto pt-6 border-t border-gray-100 bg-white sticky bottom-0">
+                    <button onclick="prevStep()" class="px-6 py-2 rounded-lg font-medium transition-all ${state.step === 0 ? 'opacity-0 pointer-events-none' : 'text-gray-600 hover:bg-gray-100'}">ย้อนกลับ</button>
+                    <button id="next-btn" onclick="nextStep()" ${!canNext ? 'disabled' : ''} class="px-8 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-all shadow-md active:scale-95 ${!canNext ? 'opacity-50 cursor-not-allowed' : ''}">ถัดไป</button>
+                </div>`;
+
+            let content = '';
+            switch(state.step) {
+                case 0:
+                    content = `${header("ยินดีต้อนรับสู่ Ubuntu", "เลือกการดำเนินการเพื่อเริ่มต้น")}
+                        <div class="flex flex-col items-center py-10 flex-1">
+                            <div class="bg-orange-50 p-8 rounded-full mb-8"><i data-lucide="monitor" class="text-orange-600 w-20 h-20"></i></div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-lg">
+                                <button onclick="nextStep()" class="p-6 border-2 border-orange-600 bg-orange-50 rounded-2xl text-center group transition-all hover:shadow-lg">
+                                    <i data-lucide="play" class="mx-auto mb-3 text-orange-600 group-hover:scale-110 transition-transform w-8 h-8"></i>
+                                    <h3 class="font-bold text-orange-900">ติดตั้ง Ubuntu</h3>
+                                </button>
+                                <button class="p-6 border-2 border-gray-200 rounded-2xl text-center group transition-all hover:border-gray-400">
+                                    <i data-lucide="globe" class="mx-auto mb-3 text-gray-400 group-hover:scale-110 transition-transform w-8 h-8"></i>
+                                    <h3 class="font-bold text-gray-700">ลองใช้ Ubuntu</h3>
+                                </button>
+                            </div>
+                        </div>${footer()}`;
+                    break;
+                case 1:
+                    content = `${header("ภาษาและคีย์บอร์ด", "เลือกรูปแบบที่ถนัดที่สุดสำหรับการใช้งาน")}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1">
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">ภาษาของระบบ</label>
+                                <div class="border rounded-xl divide-y overflow-hidden bg-white max-h-64 overflow-y-auto">
+                                    ${languages.map(l => `<div class="p-3 cursor-pointer hover:bg-orange-50 ${l.includes('Thai') ? 'bg-orange-100 text-orange-900 font-bold' : ''}">${l}</div>`).join('')}
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">ผังแป้นพิมพ์</label>
+                                <div class="border rounded-xl p-4 bg-gray-50">
+                                    <select class="w-full p-2 mb-4 border rounded bg-white"><option>Thai (Kedmanee)</option><option>English (US)</option></select>
+                                    <div class="aspect-video bg-white border rounded-lg flex items-center justify-center text-gray-300"><i data-lucide="keyboard" class="w-12 h-12"></i></div>
+                                    <input type="text" placeholder="ทดสอบการพิมพ์..." class="w-full mt-4 p-2 border rounded" />
+                                </div>
+                            </div>
+                        </div>${footer()}`;
+                    break;
+                case 2:
+                    content = `${header("การเชื่อมต่อเครือข่าย", "เชื่อมต่ออินเทอร์เน็ตเพื่อรับการอัปเดตล่าสุด")}
+                        <div class="space-y-4 flex-1">
+                            <div class="p-4 border-2 border-orange-500 rounded-xl bg-orange-50 flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div class="p-2 bg-orange-200 rounded-lg text-orange-700"><i data-lucide="wifi" class="w-6 h-6"></i></div>
+                                    <div><h4 class="font-bold text-orange-900">Ethernet Connected</h4><p class="text-sm text-orange-700">เชื่อมต่อผ่านสายแลนแล้ว</p></div>
+                                </div>
+                                <i data-lucide="check-circle" class="text-orange-600"></i>
+                            </div>
+                            <div class="p-4 border rounded-xl hover:bg-gray-50 cursor-pointer flex items-center justify-between opacity-50">
+                                <div class="flex items-center gap-4">
+                                    <div class="p-2 bg-gray-200 rounded-lg text-gray-500"><i data-lucide="wifi" class="w-6 h-6"></i></div>
+                                    <div><h4 class="font-bold text-gray-700">Wi-Fi (ไม่พร้อมใช้งาน)</h4><p class="text-sm text-gray-500">เลือกเครือข่ายไร้สาย</p></div>
+                                </div>
+                            </div>
+                        </div>${footer()}`;
+                    break;
+                case 3:
+                    content = `${header("แอปและการอัปเดต", "เลือกซอฟต์แวร์เริ่มต้นที่คุณต้องการ")}
+                        <div class="space-y-6 flex-1">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div onclick="updateFormData('installType', 'normal'); renderStep();" class="p-4 border-2 rounded-xl cursor-pointer ${state.formData.installType === 'normal' ? 'border-orange-500 bg-orange-50' : 'border-gray-200'}">
+                                    <div class="flex items-center gap-2 mb-2"><i data-lucide="layout" class="${state.formData.installType === 'normal' ? 'text-orange-600' : 'text-gray-400'}"></i><span class="font-bold">การติดตั้งแบบปกติ</span></div>
+                                    <p class="text-xs text-gray-500">มีเว็บเบราว์เซอร์, เครื่องมือสำนักงาน, เกม และซอฟต์แวร์สื่อครบครัน</p>
+                                </div>
+                                <div onclick="updateFormData('installType', 'minimal'); renderStep();" class="p-4 border-2 rounded-xl cursor-pointer ${state.formData.installType === 'minimal' ? 'border-orange-500 bg-orange-50' : 'border-gray-200'}">
+                                    <div class="flex items-center gap-2 mb-2"><i data-lucide="zap" class="${state.formData.installType === 'minimal' ? 'text-orange-600' : 'text-gray-400'}"></i><span class="font-bold">การติดตั้งขั้นต่ำ</span></div>
+                                    <p class="text-xs text-gray-500">มีเพียงเว็บเบราว์เซอร์และเครื่องมือพื้นฐาน</p>
+                                </div>
+                            </div>
+                            <div class="space-y-3 bg-gray-50 p-4 rounded-xl border">
+                                <div class="flex items-center gap-3">
+                                    <input type="checkbox" checked class="w-5 h-5 rounded text-orange-600">
+                                    <label class="text-sm text-gray-700">ติดตั้งซอฟต์แวร์เสริมสำหรับกราฟิกและ Wi-Fi</label>
+                                </div>
+                            </div>
+                        </div>${footer()}`;
+                    break;
+                case 4:
+                    content = `${header("ประเภทการติดตั้ง", "จัดการฮาร์ดดิสก์ของคุณ")}
+                        <div class="space-y-4 flex-1">
+                            <div onclick="updateFormData('diskAction', 'erase'); renderStep();" class="p-5 border-2 rounded-xl cursor-pointer ${state.formData.diskAction === 'erase' ? 'border-orange-500 bg-orange-50' : 'border-gray-200'}">
+                                <div class="flex items-center gap-3 mb-2"><i data-lucide="hard-drive" class="text-orange-600"></i><span class="font-bold">ล้างดิสก์และติดตั้ง Ubuntu</span></div>
+                                <p class="text-sm text-gray-600 ml-9">ลบข้อมูลทั้งหมดใน /dev/sda (SSD 512GB) และจัดการพาร์ทิชันให้อัตโนมัติ</p>
+                            </div>
+                        </div>${footer()}`;
+                    break;
+                case 5:
+                    content = `${header("กำลังเตรียมพาร์ทิชัน", "ยืนยันการเปลี่ยนแปลงดิสก์")}
+                        <div class="bg-neutral-800 p-6 rounded-2xl text-white font-mono text-sm space-y-4 flex-1">
+                            <div class="flex items-center gap-2 text-orange-400 border-b border-neutral-700 pb-2"><i data-lucide="info" class="w-4 h-4"></i> <span>รายละเอียดพาร์ทิชันที่จะสร้าง</span></div>
+                            <div class="grid grid-cols-3 gap-4 border-l-2 border-neutral-600 pl-4 py-2">
+                                <div>/dev/sda1</div><div>512 MB</div><div class="text-blue-400">EFI System</div>
+                                <div>/dev/sda2</div><div>480 GB</div><div class="text-blue-400">EXT4 (/)</div>
+                                <div>/dev/sda3</div><div>31.5 GB</div><div class="text-blue-400">Swap</div>
+                            </div>
+                            <p class="text-red-400 text-xs mt-4 font-sans italic font-bold">** หากคุณกดถัดไป ข้อมูลในดิสก์จะถูกลบถาวร **</p>
+                        </div>${footer()}`;
+                    break;
+                case 6:
+                    content = `${header("คุณอยู่ที่ไหน?", "ตั้งค่าโซนเวลาและภูมิภาค")}
+                        <div class="relative rounded-2xl overflow-hidden bg-[#e0f2f1] border-2 border-white shadow-inner h-[320px] flex items-center justify-center flex-1">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/e/ec/World_map_blank_without_borders.svg" class="absolute inset-0 w-full h-full object-cover opacity-30 grayscale" />
+                            <div class="relative z-10 flex flex-col items-center">
+                                <i data-lucide="map-pin" class="text-red-600 w-10 h-10 animate-bounce"></i>
+                                <div class="mt-4 bg-white px-6 py-2 rounded-full shadow-lg border-2 border-orange-100 flex items-center gap-2">
+                                    <i data-lucide="globe" class="text-blue-500 w-4 h-4"></i><span class="font-bold text-gray-800">Bangkok, Thailand</span>
+                                </div>
+                            </div>
+                        </div>${footer()}`;
+                    break;
+                case 7: // User Info (REFINED)
+                    const isPwdLongEnough = state.formData.password.length >= 6;
+                    const isMatching = state.formData.password === state.formData.confirmPassword && isPwdLongEnough;
+                    const canNextUser = state.formData.name && state.formData.username && state.formData.computerName && isMatching;
+                    content = `${header("ข้อมูลผู้ใช้", "สร้างบัญชีผู้ใช้หลักสำหรับเครื่องนี้")}
+                        <div class="flex flex-col gap-5 max-w-2xl flex-1 pb-10">
+                            <!-- Field: Name -->
+                            <div class="flex flex-col gap-1.5 relative">
+                                <label class="text-xs font-bold text-gray-500 uppercase px-1">ชื่อของคุณ</label>
+                                <div class="flex items-center relative">
+                                    <input type="text" oninput="updateFormData('name', this.value)" value="${state.formData.name}" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none transition-all" placeholder="John Doe">
+                                    <i id="name-check" data-lucide="check-circle-2" class="w-5 h-5 text-green-500 absolute right-3 transition-opacity duration-300" style="opacity: ${state.formData.name ? '1' : '0'}"></i>
+                                </div>
+                            </div>
+
+                            <!-- Field: Computer Name -->
+                            <div class="flex flex-col gap-1.5 relative">
+                                <label class="text-xs font-bold text-gray-500 uppercase px-1">ชื่อคอมพิวเตอร์ของคุณ</label>
+                                <div class="flex items-center relative">
+                                    <input type="text" oninput="updateFormData('computerName', this.value)" value="${state.formData.computerName}" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none transition-all" placeholder="ubuntu-pc">
+                                    <i id="computer-check" data-lucide="check-circle-2" class="w-5 h-5 text-green-500 absolute right-3 transition-opacity duration-300" style="opacity: ${state.formData.computerName ? '1' : '0'}"></i>
+                                </div>
+                            </div>
+
+                            <!-- Field: Username -->
+                            <div class="flex flex-col gap-1.5 relative">
+                                <label class="text-xs font-bold text-gray-500 uppercase px-1">เลือกชื่อผู้ใช้</label>
+                                <div class="flex items-center relative">
+                                    <input type="text" oninput="updateFormData('username', this.value)" value="${state.formData.username}" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none transition-all" placeholder="john">
+                                    <i id="user-check" data-lucide="check-circle-2" class="w-5 h-5 text-green-500 absolute right-3 transition-opacity duration-300" style="opacity: ${state.formData.username ? '1' : '0'}"></i>
+                                </div>
+                            </div>
+
+                            <!-- Field: Password Row -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="flex flex-col gap-1.5 relative">
+                                    <label class="text-xs font-bold text-gray-500 uppercase px-1">เลือกชื่อรหัสผ่าน</label>
+                                    <div class="flex items-center relative">
+                                        <input type="password" oninput="updateFormData('password', this.value)" value="${state.formData.password}" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none transition-all" placeholder="••••••••">
+                                        <i id="pwd-check" data-lucide="check-circle-2" class="w-5 h-5 text-green-500 absolute right-3 transition-opacity duration-300" style="opacity: ${isPwdLongEnough ? '1' : '0'}"></i>
+                                    </div>
+                                    ${state.formData.password && !isPwdLongEnough ? '<p class="text-[10px] text-red-500 px-1 italic">รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร</p>' : ''}
+                                </div>
+                                <div class="flex flex-col gap-1.5 relative">
+                                    <label class="text-xs font-bold text-gray-500 uppercase px-1">ยืนยันรหัสผ่าน</label>
+                                    <div class="flex items-center relative">
+                                        <input type="password" oninput="updateFormData('confirmPassword', this.value)" value="${state.formData.confirmPassword}" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none transition-all" placeholder="••••••••">
+                                        <i id="confirm-check" data-lucide="check-circle-2" class="w-5 h-5 text-green-500 absolute right-3 transition-opacity duration-300" style="opacity: ${isMatching ? '1' : '0'}"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Login Options -->
+                            <div class="mt-4 flex flex-col gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                <label class="flex items-center gap-3 cursor-pointer group">
+                                    <input type="radio" name="login_opt" value="auto" onchange="updateFormData('loginOption', this.value)" ${state.formData.loginOption === 'auto' ? 'checked' : ''} class="w-4 h-4 text-orange-600 focus:ring-orange-500">
+                                    <span class="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">เข้าสู่ระบบโดยอัตโนมัติ</span>
+                                </label>
+                                <label class="flex items-center gap-3 cursor-pointer group">
+                                    <input type="radio" name="login_opt" value="require_pwd" onchange="updateFormData('loginOption', this.value)" ${state.formData.loginOption === 'require_pwd' ? 'checked' : ''} class="w-4 h-4 text-orange-600 focus:ring-orange-500">
+                                    <span class="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">ต้องใช้รหัสผ่านเพื่อเข้าสู่ระบบ</span>
+                                </label>
+                            </div>
+                        </div>${footer(canNextUser)}`;
+                    break;
+                case 8:
+                    content = `<div class="flex flex-col h-full fade-in">
+                        <div class="flex-1 install-gradient rounded-2xl p-8 text-white relative overflow-hidden flex flex-col items-center justify-center text-center shadow-2xl">
+                            <div class="relative z-10 flex flex-col items-center">
+                                <div id="slide-icon" class="mb-8"><i data-lucide="monitor" class="w-16 h-16 text-orange-500"></i></div>
+                                <h2 id="slide-title" class="text-3xl font-bold mb-4">${slides[0].title}</h2>
+                                <p id="slide-desc" class="text-purple-200 max-w-lg mb-12 h-16 leading-relaxed px-4">${slides[0].desc}</p>
+                            </div>
+                            <div class="w-full max-w-xl mt-auto relative z-10">
+                                <div class="flex justify-between text-xs text-purple-300 mb-3 font-mono"><span id="status-text">กำลังคัดลอกไฟล์...</span><span id="progress-percent">0%</span></div>
+                                <div class="w-full bg-black bg-opacity-40 rounded-full h-2.5 overflow-hidden border border-white border-opacity-10">
+                                    <div id="progress-fill" class="bg-gradient-to-r from-orange-400 to-orange-600 h-full transition-all duration-300 shadow-[0_0_15px_rgba(233,84,32,0.6)]" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                    break;
+                case 9:
+                    content = `<div class="text-center py-12 flex flex-col items-center fade-in">
+                        <i data-lucide="check-circle" class="w-32 h-32 text-green-500"></i>
+                        <h2 class="text-3xl font-bold mt-8 mb-4 text-gray-900">ติดตั้งเสร็จสมบูรณ์!</h2>
+                        <button onclick="window.location.reload()" class="px-8 py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-2xl font-bold text-lg">เริ่มระบบใหม่</button>
+                    </div>`;
+                    break;
+            }
+
+            container.innerHTML = content;
+            lucide.createIcons();
+        }
+
+        function startInstallation() {
+            let activeSlide = 0;
+            const installInterval = setInterval(() => {
+                if (state.installProgress >= 100) {
+                    clearInterval(installInterval);
+                    state.step = 9;
+                    renderStep();
+                    return;
+                }
+                state.installProgress += 1;
+                const progressFill = document.getElementById('progress-fill');
+                const progressText = document.getElementById('progress-percent');
+                if (progressFill) progressFill.style.width = `${state.installProgress}%`;
+                if (progressText) progressText.innerText = `${state.installProgress}%`;
+            }, 150);
+
+            setInterval(() => {
+                activeSlide = (activeSlide + 1) % slides.length;
+                const title = document.getElementById('slide-title');
+                const desc = document.getElementById('slide-desc');
+                const icon = document.getElementById('slide-icon');
+                if (title) title.innerText = slides[activeSlide].title;
+                if (desc) desc.innerText = slides[activeSlide].desc;
+                if (icon) {
+                    icon.innerHTML = `<i data-lucide="${slides[activeSlide].icon}" class="w-16 h-16 text-orange-500"></i>`;
+                    lucide.createIcons();
+                }
+            }, 4000);
+        }
+
+        init();
+    </script>
+</body>
+</html>
