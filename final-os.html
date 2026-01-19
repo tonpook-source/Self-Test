@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ข้อสอบปลายภาค: ระบบปฏิบัติการ (31909-1001)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
+                    },
+                    colors: {
+                        cyber: {
+                            dark: '#0f172a',
+                            light: '#1e293b',
+                            accent: '#38bdf8',
+                            neon: '#0ea5e9',
+                            success: '#22c55e',
+                            danger: '#ef4444'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f172a;
+            background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+        .option-card {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .option-card:hover {
+            transform: translateX(5px);
+            background: rgba(56, 189, 248, 0.1);
+            border-color: #38bdf8;
+        }
+        .option-selected {
+            background: rgba(56, 189, 248, 0.2) !important;
+            border-color: #38bdf8 !important;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+        select option {
+            background-color: #1e293b;
+            color: white;
+        }
+        
+        /* Modal Animation */
+        .modal-enter {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        .modal-enter-active {
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 300ms, transform 300ms;
+        }
+        .modal-exit {
+            opacity: 1;
+        }
+        .modal-exit-active {
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 200ms, transform 200ms;
+        }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Loading Overlay -->
+    <div id="loadingScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900 transition-opacity duration-500">
+        <div class="text-center">
+            <div class="w-16 h-16 border-4 border-cyber-accent border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <h2 class="text-xl font-bold text-cyber-accent animate-pulse">กำลังโหลดข้อสอบ...</h2>
+        </div>
+    </div>
+
+    <!-- Custom Modal (Replacement for alert/confirm) -->
+    <div id="customModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 hidden transition-opacity duration-300 backdrop-blur-sm">
+        <div id="modalContent" class="bg-slate-800 border border-slate-600 rounded-xl p-6 max-w-sm w-full mx-4 shadow-2xl transform scale-95 transition-transform duration-300">
+            <h3 id="modalTitle" class="text-xl font-bold text-white mb-2 flex items-center">
+                <i class="fa-solid fa-bell text-cyber-accent mr-2"></i>
+                <span>แจ้งเตือน</span>
+            </h3>
+            <p id="modalMessage" class="text-slate-300 mb-6 text-lg leading-relaxed">ข้อความ</p>
+            <div class="flex justify-end space-x-3">
+                <button id="modalBtnCancel" class="px-4 py-2 rounded-lg border border-slate-600 text-slate-400 hover:bg-slate-700 hover:text-white transition hidden">ยกเลิก</button>
+                <button id="modalBtnConfirm" class="px-6 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold hover:shadow-lg hover:shadow-cyan-500/30 transition">ตกลง</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="w-full max-w-4xl relative z-10">
+        
+        <!-- Header Section -->
+        <header class="mb-8 text-center animate-float">
+            <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 drop-shadow-lg mb-2">
+                <i class="fa-solid fa-microchip mr-2"></i>การทดสอบปลายภาคเรียน
+            </h1>
+            <p class="text-slate-400 text-lg">รหัสวิชา 31909-1001 วิชาระบบปฏิบัติการ</p>
+            <p class="text-cyber-accent font-semibold mt-1">ครูผู้สอน: ครูธนพล อ่อนพุก</p>
+        </header>
+
+        <!-- Login / Start Section -->
+        <div id="startSection" class="glass-panel rounded-2xl p-8 mb-6 animate-fade-in-up">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="space-y-4">
+                    <h2 class="text-2xl font-bold text-white mb-4 border-b border-slate-700 pb-2">ลงทะเบียนเข้าสอบ</h2>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-400 mb-1">ชื่อ-นามสกุล</label>
+                        <input type="text" id="studentName" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyber-accent focus:ring-1 focus:ring-cyber-accent transition-colors" placeholder="นายรักเรียน เพียรศึกษา">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-400 mb-1">เลขที่</label>
+                        <input type="number" id="studentID" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyber-accent focus:ring-1 focus:ring-cyber-accent transition-colors" placeholder="เช่น 15">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-400 mb-1">กลุ่มเรียน</label>
+                        <select id="studentGroup" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyber-accent focus:ring-1 focus:ring-cyber-accent transition-colors appearance-none cursor-pointer">
+                            <option value="" disabled selected>-- เลือกห้องเรียน --</option>
+                            <option value="ส.1/1 ทค.">ส.1/1 ทค.</option>
+                            <option value="ส.1/2 ทค.">ส.1/2 ทค.</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white"></div>
+                    </div>
+
+                    <button onclick="startExam()" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition hover:scale-105 active:scale-95 mt-4">
+                        <i class="fa-solid fa-rocket mr-2"></i>เริ่มทำข้อสอบ
+                    </button>
+                </div>
+
+                <div class="hidden md:block text-center p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+                    <div class="text-6xl text-cyber-accent mb-4"><i class="fa-solid fa-laptop-code"></i></div>
+                    <h3 class="text-xl font-bold text-white mb-2">คำชี้แจง</h3>
+                    <ul class="text-slate-400 text-sm text-left space-y-2 list-disc pl-5">
+                        <li>ข้อสอบปรนัยจำนวน 60 ข้อ</li>
+                        <li>ครอบคลุมเนื้อหาระบบปฏิบัติการ Windows, Linux และ Mobile</li>
+                        <li>เมื่อกดส่ง คะแนนจะถูกบันทึกทันที</li>
+                        <li><span class="text-red-400">ห้าม</span> เปิดหน้าต่างอื่นขณะทำข้อสอบ</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exam Section (Hidden initially) -->
+        <div id="examSection" class="hidden">
+            <!-- Progress & Timer Bar -->
+            <div class="flex justify-between items-center mb-4 glass-panel p-3 rounded-lg sticky top-2 z-40 bg-slate-900/90">
+                <div class="flex items-center space-x-4">
+                    <div class="text-slate-300 font-mono text-xl">
+                        <span id="currentQuestionNum" class="text-cyber-accent font-bold text-2xl">1</span><span class="text-sm text-slate-500">/60</span>
+                    </div>
+                    <div class="hidden sm:block w-32 h-2 bg-slate-700 rounded-full overflow-hidden">
+                        <div id="progressBar" class="h-full bg-gradient-to-r from-blue-500 to-cyan-400 w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+                <div class="flex items-center text-cyber-accent font-mono text-xl bg-slate-800 px-3 py-1 rounded border border-slate-700">
+                    <i class="fa-regular fa-clock mr-2 animate-pulse"></i>
+                    <span id="timerDisplay">00:00:00</span>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="glass-panel rounded-2xl p-6 md:p-10 mb-6 min-h-[400px] flex flex-col justify-center relative overflow-hidden">
+                <!-- Background Decoration -->
+                <div class="absolute top-0 right-0 -mr-10 -mt-10 w-40 h-40 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
+                <div class="absolute bottom-0 left-0 -ml-10 -mb-10 w-40 h-40 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
+
+                <!-- Topic Badge -->
+                <div class="mb-4">
+                    <span id="questionTopic" class="bg-slate-700 text-cyan-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide border border-slate-600">
+                        Topic
+                    </span>
+                </div>
+
+                <!-- Question Text -->
+                <h3 id="questionText" class="text-xl md:text-2xl font-semibold text-white mb-8 leading-relaxed">
+                    Loading Question...
+                </h3>
+
+                <!-- Options Grid -->
+                <div id="optionsContainer" class="grid grid-cols-1 gap-4">
+                    <!-- Options will be injected here -->
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center">
+                <button onclick="prevQuestion()" id="btnPrev" class="px-6 py-3 rounded-lg bg-slate-700 text-slate-300 hover:bg-slate-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fa-solid fa-chevron-left mr-2"></i>ย้อนกลับ
+                </button>
+                <div class="space-x-2">
+                    <button onclick="markReview()" class="px-4 py-3 rounded-lg border border-yellow-600 text-yellow-500 hover:bg-yellow-900/20 transition" title="ทำเครื่องหมายเพื่อทบทวน">
+                        <i class="fa-regular fa-bookmark"></i>
+                    </button>
+                    <button onclick="nextQuestion()" id="btnNext" class="px-8 py-3 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold hover:shadow-lg hover:shadow-blue-500/30 transition">
+                        ถัดไป<i class="fa-solid fa-chevron-right ml-2"></i>
+                    </button>
+                    <button onclick="submitExam()" id="btnSubmit" class="hidden px-8 py-3 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold hover:shadow-lg hover:shadow-green-500/30 transition animate-pulse-slow">
+                        ส่งคำตอบ<i class="fa-solid fa-check-circle ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Section (Hidden initially) -->
+        <div id="resultSection" class="hidden glass-panel rounded-2xl p-10 text-center animate-fade-in-up">
+            <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/50">
+                <i class="fa-solid fa-trophy text-4xl text-white"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-white mb-2">ส่งข้อสอบเรียบร้อย!</h2>
+            <p class="text-slate-400 mb-8">ระบบได้บันทึกคะแนนของคุณลงฐานข้อมูลแล้ว</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                    <p class="text-slate-400 text-sm">คะแนนที่ได้</p>
+                    <p class="text-4xl font-bold text-cyber-accent mt-1"><span id="scoreDisplay">0</span><span class="text-lg text-slate-500">/60</span></p>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                    <p class="text-slate-400 text-sm">คิดเป็นร้อยละ</p>
+                    <p class="text-4xl font-bold text-green-400 mt-1"><span id="percentDisplay">0</span>%</p>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                    <p class="text-slate-400 text-sm">เวลาที่ใช้</p>
+                    <p id="timeUsedDisplay" class="text-2xl font-bold text-orange-400 mt-2 font-mono">00:00:00</p>
+                </div>
+            </div>
+
+            <div id="saveStatus" class="p-3 rounded-lg bg-blue-900/30 text-blue-300 border border-blue-800 mb-6">
+                <i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังส่งข้อมูลไปยัง Google Sheets...
+            </div>
+
+            <button onclick="location.reload()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-8 rounded-lg transition">
+                กลับสู่หน้าหลัก
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // --- CONFIGURATION ---
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzGPp1BaujQADtnqe6CP7WpaQ3qWbwL6q8Q24X7f0AOU4nBsrGlLhFTO-LHd6_41ZD1fg/exec'; 
+
+        // --- DATA: 60 Questions ---
+        const questionsSource = [
+            // 1. พื้นฐานระบบคอมพิวเตอร์ (5)
+            { t: "พื้นฐานระบบคอมพิวเตอร์", q: "ข้อใดคือหน้าที่หลักของหน่วยประมวลผลกลาง (CPU)", o: ["คำนวณและควบคุมการทำงาน", "จัดเก็บข้อมูลอย่างถาวร", "แสดงผลลัพธ์ออกทางจอภาพ", "จ่ายกระแสไฟฟ้าสู่อุปกรณ์"] },
+            { t: "พื้นฐานระบบคอมพิวเตอร์", q: "หน่วยความจำชนิดใดข้อมูลหายเมื่อไฟดับ", o: ["Random Access Memory (RAM)", "Read Only Memory (ROM)", "Hard Disk Drive (HDD)", "Flash Drive Memory"] },
+            { t: "พื้นฐานระบบคอมพิวเตอร์", q: "ข้อใดเป็นอุปกรณ์นำเข้า (Input Unit) ทั้งหมด", o: ["เมาส์, คีย์บอร์ด, ไมค์", "จอภาพ, เครื่องพิมพ์, ลำโพง", "สแกนเนอร์, จอสัมผัส, แรม", "ฮาร์ดดิสก์, ซีพียู, เคส"] },
+            { t: "พื้นฐานระบบคอมพิวเตอร์", q: "ระบบปฏิบัติการ (OS) มีหน้าที่หลักคืออะไร", o: ["เป็นตัวกลางระหว่างฮาร์ดแวร์กับผู้ใช้", "ใช้สำหรับพิมพ์งานเอกสารทั่วไป", "ช่วยป้องกันไวรัสในคอมพิวเตอร์", "ใช้สำหรับตกแต่งภาพกราฟิก"] },
+            { t: "พื้นฐานระบบคอมพิวเตอร์", q: "ข้อใดไม่ใช่ส่วนประกอบหลักของ Computer System", o: ["Atmosphere (บรรยากาศ)", "Hardware (ฮาร์ดแวร์)", "Software (ซอฟต์แวร์)", "Peopleware (บุคลากร)"] },
+
+            // 2. Mobile OS (5)
+            { t: "Mobile OS", q: "ระบบปฏิบัติการ Android พัฒนาโดยบริษัทใด", o: ["Google LLC", "Apple Inc.", "Microsoft Corp", "Samsung Elect"] },
+            { t: "Mobile OS", q: "iOS เป็นระบบปฏิบัติการบนอุปกรณ์ใด", o: ["iPhone และ iPad", "MacBook Pro รุ่นใหม่", "Samsung Galaxy Tab", "Microsoft Surface"] },
+            { t: "Mobile OS", q: "ไฟล์ติดตั้งแอปบน Android มีนามสกุลใด", o: [".APK", ".EXE", ".IPA", ".DMG"] },
+            { t: "Mobile OS", q: "จุดเด่นของระบบปฏิบัติการแบบ Open Source คือ", o: ["นำไปพัฒนาต่อยอดได้ฟรี", "มีความปลอดภัยสูงสุด", "ใช้งานได้เฉพาะเครื่องแพง", "ไม่มีโฆษณารบกวนเลย"] },
+            { t: "Mobile OS", q: "ร้านค้าแอปพลิเคชันของ iOS เรียกว่าอะไร", o: ["App Store", "Google Play", "Galaxy Store", "Huawei Gallery"] },
+
+            // 3. DOS (5)
+            { t: "ระบบปฏิบัติการ DOS", q: "คำสั่งใดใช้ดูรายชื่อไฟล์ในไดเรกทอรี", o: ["DIR (Directory)", "CD (Change Dir)", "MD (Make Dir)", "CLS (Clear Scr)"] },
+            { t: "ระบบปฏิบัติการ DOS", q: "ต้องการล้างหน้าจอต้องใช้คำสั่งใด", o: ["CLS", "CLEAR", "EXIT", "WIPE"] },
+            { t: "ระบบปฏิบัติการ DOS", q: "คำสั่ง CD (Change Directory) ทำหน้าที่อะไร", o: ["เปลี่ยนตำแหน่งโฟลเดอร์", "สร้างไดเรกทอรีใหม่ขึ้นมา", "ลบไดเรกทอรีทิ้งทันที", "คัดลอกไฟล์ข้อมูลทั้งหมด"] },
+            { t: "ระบบปฏิบัติการ DOS", q: "Command Prompt ใน Windows จำลองมาจากระบบใด", o: ["MS-DOS", "Linux", "Unix", "Mac OS"] },
+            { t: "ระบบปฏิบัติการ DOS", q: "คำสั่งสร้างโฟลเดอร์ใหม่คือข้อใด", o: ["MD (Make Directory)", "RD (Remove Directory)", "CD (Change Directory)", "ED (Edit Directory)"] },
+
+            // 4. Windows 11 Usage (7)
+            { t: "การใช้งาน Windows 11", q: "ปุ่ม Start Menu ใน Windows 11 อยู่ตำแหน่งใด (ค่าเดิม)", o: ["กึ่งกลาง Taskbar", "ซ้ายสุด Taskbar", "ขวาสุด Taskbar", "ด้านบนสุดของหน้าจอ"] },
+            { t: "การใช้งาน Windows 11", q: "Snap Layouts มีประโยชน์อย่างไร", o: ["จัดเรียงหน้าต่างโปรแกรมง่ายขึ้น", "ช่วยประหยัดพลังงานแบตเตอรี่", "ช่วยเพิ่มความเร็วอินเทอร์เน็ต", "ช่วยป้องกันไวรัสและสปายแวร์"] },
+            { t: "การใช้งาน Windows 11", q: "คีย์ลัดสำหรับแคปหน้าจอเลือกพื้นที่ได้คือ", o: ["Win + Shift + S", "Print Screen Key", "Alt + F4 Button", "Ctrl + C Button"] },
+            { t: "การใช้งาน Windows 11", q: "Widgets ใน Windows 11 ใช้ทำอะไร", o: ["ดูข่าว สภาพอากาศ และหุ้น", "ปรับแต่งการตั้งค่าระบบ", "บริหารจัดการไฟล์ในเครื่อง", "แก้ไขค่า Registry System"] },
+            { t: "การใช้งาน Windows 11", q: "Virtual Desktop มีไว้เพื่ออะไร", o: ["แยกหน้าจอทำงานเป็นกลุ่ม", "จำลองวินโดวส์ซ้อนวินโดวส์", "ช่วยให้เล่นเกมได้ลื่นขึ้น", "ใช้เชื่อมต่อกับแว่นตา VR"] },
+            { t: "การใช้งาน Windows 11", q: "แถบด้านล่างที่แสดงไอคอนโปรแกรมเรียกว่า", o: ["Taskbar (แถบงาน)", "Title Bar (ชื่อ)", "Menu Bar (เมนู)", "Status Bar (สถานะ)"] },
+            { t: "การใช้งาน Windows 11", q: "คีย์ลัดเข้าหน้า Settings คือข้อใด", o: ["Win + I", "Win + E", "Win + R", "Win + D"] },
+
+            // 5. Virtualization (5)
+            { t: "Virtualization", q: "Virtualization หมายถึงกระบวนการใด", o: ["จำลองสภาพแวดล้อมระบบคอมฯ", "ทำความสะอาดอุปกรณ์ฮาร์ดแวร์", "เพิ่มความเร็วของอินเทอร์เน็ต", "กู้คืนข้อมูลที่ถูกลบไปแล้ว"] },
+            { t: "Virtualization", q: "เครื่องจริงที่รันโปรแกรมจำลองเรียกว่า", o: ["Host Machine", "Guest System", "Virtual Machine", "Cloud Server"] },
+            { t: "Virtualization", q: "OS ที่ติดตั้งในโปรแกรมจำลองเรียกว่า", o: ["Guest OS", "Host OS", "Core OS", "Main OS"] },
+            { t: "Virtualization", q: "ข้อดีของการใช้ VM ทดสอบโปรแกรมคือ", o: ["ระบบหลักไม่พังเมื่อเกิดปัญหา", "ช่วยประหยัดไฟกว่าเครื่องปกติ", "ทำให้เครื่องทำงานเร็วขึ้นมาก", "แสดงผลภาพกราฟิกสวยงามขึ้น"] },
+            { t: "Virtualization", q: "โปรแกรมใด **ไม่ใช่** สำหรับทำ VM", o: ["Adobe Photoshop", "Oracle VirtualBox", "VMware Workstation", "Microsoft Hyper-V"] },
+
+            // 6. Install Win 11 Desktop (10)
+            { t: "ติดตั้ง Windows 11 Desktop", q: "ชิปความปลอดภัยที่ Windows 11 ต้องการคือ", o: ["TPM 2.0", "GPS 3.0", "NFC 1.2", "RFID 5.0"] },
+            { t: "ติดตั้ง Windows 11 Desktop", q: "ระบบ Boot แบบใดที่ Windows 11 บังคับใช้", o: ["UEFI Secure Boot", "Legacy BIOS Boot", "MS-DOS System Boot", "Floppy Disk Boot"] },
+            { t: "ติดตั้ง Windows 11 Desktop", q: "โปรแกรมยอดนิยมทำ USB Boot Windows คือ", o: ["Rufus Program", "WinRAR Program", "Nero Burning ROM", "Microsoft Word"] },
+            { t: "ติดตั้ง Windows 11 Desktop", q: "ปุ่มคีย์ลัดเข้า Boot Menu มักจะเป็นปุ่มใด", o: ["F12 หรือ F8", "Ctrl + Alt", "Spacebar Key", "Enter Key"] },
+            { t: "ติดตั้ง Windows 11 Desktop", q: "RAM ขั้นต่ำที่ Windows 11 ต้องการคือ", o: ["4 GB RAM", "2 GB RAM", "1 GB RAM", "8 GB RAM"] },
+            { t: "ติดตั้ง Windows 11 Desktop", q: "Storage ขั้นต่ำที่ Windows 11 ต้องการคือ", o: ["64 GB Storage", "32 GB Storage", "16 GB Storage", "128 GB Storage"] },
+            { t: "ติดตั้ง Windows 11 Desktop", q: "ต้องการล้างเครื่องลงใหม่ต้องเลือกแบบใด", o: ["Custom: Install Windows only", "Upgrade: Install and keep files", "Repair your computer system", "System Restore point recovery"] },
+            { t: "ติดตั้ง Windows 11 Desktop", q: "Partition Style ที่เหมาะกับ UEFI คือ", o: ["GPT (GUID Partition Table)", "MBR (Master Boot Record)", "FAT32 (File Allocation)", "NTFS (New Technology)"] },
+            { t: "ติดตั้ง Windows 11 Desktop", q: "OOBE คือขั้นตอนใดของการติดตั้ง", o: ["ตั้งค่าเริ่มต้นหลังติดตั้งเสร็จ", "แบ่งพาร์ติชันฮาร์ดดิสก์", "ฟอร์แมตไดรฟ์เพื่อล้างข้อมูล", "อัปเดต BIOS ของเมนบอร์ด"] },
+            { t: "ติดตั้ง Windows 11 Desktop", q: "ถ้าไม่มี Product Key ตอนลงต้องกดอะไร", o: ["I don't have a product key", "Cancel Installation Now", "Contact Microsoft Support", "Restart Computer Machine"] },
+
+            // 7. Install Win 11 VirtualBox (5)
+            { t: "ติดตั้ง Win 11 บน VirtualBox", q: "ไฟล์ Image ของแผ่นติดตั้งเรียกว่า", o: [".ISO Image File", ".IMG Image File", ".ZIP Archive File", ".RAR Archive File"] },
+            { t: "ติดตั้ง Win 11 บน VirtualBox", q: "Guest Additions ติดตั้งเพื่ออะไร", o: ["เพิ่มประสิทธิภาพจอและการเชื่อมต่อ", "เพื่อติดตั้งเกมส์คอมพิวเตอร์", "เพื่อสแกนและล้างไวรัสในระบบ", "เพื่อเปลี่ยนธีมหน้าจอวินโดวส์"] },
+            { t: "ติดตั้ง Win 11 บน VirtualBox", q: "ปุ่มปลดล็อกเมาส์ออกจาก VM (ค่าปกติ) คือ", o: ["Right Ctrl Key", "Left Alt Key", "Esc Key Button", "F1 Key Button"] },
+            { t: "ติดตั้ง Win 11 บน VirtualBox", q: "โหมด Network ที่ให้ VM ได้ IP วงเดียวกับ Host", o: ["Bridged Adapter", "NAT Network Mode", "Internal Network", "Host-only Adapter"] },
+            { t: "ติดตั้ง Win 11 บน VirtualBox", q: "RAM ของ VM ถูกดึงมาจากส่วนใด", o: ["RAM ของเครื่องจริง (Host)", "Harddisk ของเครื่องจริง", "หน่วยความจำการ์ดจอ", "พื้นที่ Cloud Storage"] },
+
+            // 8. การติดตั้ง Windows 11 (General) (5)
+            { t: "การติดตั้ง Windows 11", q: "ระหว่างติดตั้ง Windows ควรเชื่อมต่อสิ่งใด", o: ["สัญญาณอินเทอร์เน็ต", "เครื่องพิมพ์เอกสาร", "กล้องเว็บแคมเมรา", "ไมโครโฟนบันทึกเสียง"] },
+            { t: "การติดตั้ง Windows 11", q: "บัญชีผู้ใช้ที่ไมโครซอฟต์แนะนำให้ใช้คือ", o: ["Microsoft Account", "Local User Account", "Guest User Account", "Admin Root Account"] },
+            { t: "การติดตั้ง Windows 11", q: "Windows 11 Home ต่างจาก Pro เรื่องใดหลักๆ", o: ["BitLocker และ Remote Desktop", "ความสามารถดูหนังฟังเพลง", "ประสิทธิภาพในการเล่นเกม", "ความเร็วในการเข้าเว็บไซต์"] },
+            { t: "การติดตั้ง Windows 11", q: "การเช็คสเปคก่อนลง Windows ใช้โปรแกรมใดของ MS", o: ["PC Health Check", "Disk Cleanup Tool", "Task Manager Tool", "DirectX Diagnostic"] },
+            { t: "การติดตั้ง Windows 11", q: "ไฟล์ระบบหลักของ Windows จะอยู่ที่ไดรฟ์ใด", o: ["Drive C: (Local Disk)", "Drive D: (Data Disk)", "Drive A: (Floppy Disk)", "Drive Z: (Network Disk)"] },
+
+            // 9. Partitioning (5)
+            { t: "การแบ่งพาร์ติชัน", q: "เครื่องมือจัดการดิสก์ใน Windows เรียกว่า", o: ["Disk Management Tool", "Disk Doctor Program", "Partition Magic Tool", "Drive Manager System"] },
+            { t: "การแบ่งพาร์ติชัน", q: "ต้องการแบ่งไดรฟ์ C เพื่อสร้างไดรฟ์ D ต้องทำอะไร", o: ["Shrink Volume (ย่อ)", "Extend Volume (ขยาย)", "Delete Volume (ลบไดรฟ์)", "Format Volume (ล้าง)"] },
+            { t: "การแบ่งพาร์ติชัน", q: "ระบบไฟล์ (File System) มาตรฐานของ Windows คือ", o: ["NTFS File System", "FAT32 File System", "EXT4 File System", "HFS+ File System"] },
+            { t: "การแบ่งพาร์ติชัน", q: "Unallocated Space หมายถึงอะไร", o: ["พื้นที่ว่างที่ยังไม่ถูกสร้างพาร์ติชัน", "พื้นที่ส่วนที่เสียหายใช้งานไม่ได้", "พื้นที่สำหรับเก็บไฟล์ระบบวินโดวส์", "พื้นที่สำหรับสำรองข้อมูลที่สำคัญ"] },
+            { t: "การแบ่งพาร์ติชัน", q: "การ Format ไดรฟ์จะส่งผลอย่างไร", o: ["ข้อมูลทั้งหมดในไดรฟ์จะหายไป", "ข้อมูลจะถูกจัดเรียงใหม่ทั้งหมด", "ช่วยเพิ่มพื้นที่ว่างให้มากขึ้น", "ช่วยตรวจสอบและกำจัดไวรัส"] },
+
+            // 10. LAN Cable (5)
+            { t: "การเข้าหัวสายแลน", q: "มาตรฐานการเรียงสายแลนที่นิยมใช้ทั่วไปคือ", o: ["Standard T568B", "Standard T568A", "Standard T568C", "Standard ISO9001"] },
+            { t: "การเข้าหัวสายแลน", q: "หัวต่อที่ใช้สำหรับสายแลนเรียกว่าหัวอะไร", o: ["RJ-45 Connector", "RJ-11 Connector", "USB-C Connector", "HDMI Connector"] },
+            { t: "การเข้าหัวสายแลน", q: "สายแลนภายในประกอบด้วยสายทองแดงกี่เส้น", o: ["8 เส้น (4 คู่สาย)", "4 เส้น (2 คู่สาย)", "6 เส้น (3 คู่สาย)", "10 เส้น (5 คู่สาย)"] },
+            { t: "การเข้าหัวสายแลน", q: "อุปกรณ์ที่ใช้ทดสอบว่าเข้าหัวถูกต้องหรือไม่คือ", o: ["LAN Cable Tester", "Digital Multimeter", "Oscilloscope Tool", "Voltage Detector"] },
+            { t: "การเข้าหัวสายแลน", q: "สีแรก (ซ้ายสุด) ของมาตรฐาน T568B คือสีอะไร", o: ["ขาว-ส้ม (White-Orange)", "ขาว-เขียว (White-Green)", "ส้มล้วน (Orange Color)", "เขียวล้วน (Green Color)"] },
+
+            // 11. Ubuntu vs Windows (3)
+            { t: "Ubuntu vs Windows", q: "ข้อดีหลักของ Ubuntu ที่เหนือกว่า Windows คือ", o: ["ฟรีและเป็น Open Source", "เล่นเกมได้ลื่นไหลกว่า", "ใช้โปรแกรม Adobe ได้ครบ", "มีผู้ใช้งานจำนวนเยอะกว่า"] },
+            { t: "Ubuntu vs Windows", q: "Windows ชนะ Ubuntu ในเรื่องใดชัดเจนที่สุด", o: ["ความเข้ากันได้ของซอฟต์แวร์และเกม", "มีความปลอดภัยจากไวรัสมากกว่า", "มีราคาถูกกว่าและคุ้มค่ากว่า", "สามารถปรับแต่งโค้ดได้อิสระ"] },
+            { t: "Ubuntu vs Windows", q: "ไฟล์โปรแกรม .exe ของ Windows รันบน Ubuntu ได้หรือไม่", o: ["ไม่ได้ทันที (ต้องใช้ Wine ช่วย)", "สามารถรันได้เลยทันที", "รันได้แต่ภาพจะไม่ค่อยชัด", "อาจทำให้เครื่องคอมพังได้"] }
+        ];
+
+        // --- APP STATE ---
+        let currentQuestions = [];
+        let currentIdx = 0;
+        let userAnswers = {}; // { questionIndex: optionIndex }
+        let timerInterval;
+        let secondsElapsed = 0;
+        let studentInfo = {};
+        let modalCallback = null;
+
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('opacity-0');
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.display = 'none';
+                }, 500);
+            }, 1000);
+        };
+
+        // --- CUSTOM MODAL SYSTEM ---
+        function showCustomAlert(title, message, callback = null) {
+            showCustomModal(title, message, false, callback);
+        }
+
+        function showCustomConfirm(title, message, callback) {
+            showCustomModal(title, message, true, callback);
+        }
+
+        function showCustomModal(title, message, hasCancel, callback) {
+            document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-bell text-cyber-accent mr-2"></i> ${title}`;
+            document.getElementById('modalMessage').innerText = message;
+            
+            const btnCancel = document.getElementById('modalBtnCancel');
+            const btnConfirm = document.getElementById('modalBtnConfirm');
+            const modal = document.getElementById('customModal');
+            const modalContent = document.getElementById('modalContent');
+            
+            if (hasCancel) {
+                btnCancel.classList.remove('hidden');
+                btnCancel.onclick = () => hideModal();
+            } else {
+                btnCancel.classList.add('hidden');
+            }
+
+            modalCallback = callback;
+            btnConfirm.onclick = () => {
+                hideModal();
+                if (modalCallback) modalCallback();
+            };
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function hideModal() {
+            const modal = document.getElementById('customModal');
+            const modalContent = document.getElementById('modalContent');
+            
+            modal.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            modalContent.classList.remove('scale-100');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // Helper function for unbiased shuffling (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startExam() {
+            const name = document.getElementById('studentName').value.trim();
+            const id = document.getElementById('studentID').value.trim();
+            const group = document.getElementById('studentGroup').value.trim();
+
+            if (!name || !id || !group) {
+                showCustomAlert("ข้อมูลไม่ครบ", "กรุณากรอกชื่อ, เลขที่ และเลือกห้องเรียนให้ครบถ้วน");
+                return;
+            }
+
+            studentInfo = { name, id, group };
+            
+            // 1. สร้างชุดตำแหน่งคำตอบที่ถูก (Balance Correct Positions: 15 A, 15 B, 15 C, 15 D)
+            // 0=ก, 1=ข, 2=ค, 3=ง
+            let correctPositions = [];
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 15; j++) {
+                    correctPositions.push(i);
+                }
+            }
+            // สลับตำแหน่งของคำตอบที่ถูกให้กระจายตัว
+            correctPositions = shuffleArray(correctPositions);
+
+            // 2. Map คำถามโดยใช้ตำแหน่งที่กำหนดไว้
+            currentQuestions = questionsSource.map((item, index) => {
+                // ดึงตำแหน่งที่คำตอบถูกควรจะอยู่ (จากที่เตรียมไว้)
+                const targetCorrectIndex = correctPositions[index];
+                
+                // แยกคำตอบถูกและคำตอบหลอก
+                const correctAnswer = item.o[0];
+                const distractors = item.o.slice(1);
+                
+                // สลับลำดับของตัวหลอกเพื่อไม่ให้จำเจ
+                shuffleArray(distractors);
+                
+                // สร้างอาเรย์ตัวเลือกสุดท้าย
+                let finalOptions = [...distractors];
+                // แทรกคำตอบถูกลงไปในตำแหน่งที่กำหนด (0-3)
+                finalOptions.splice(targetCorrectIndex, 0, correctAnswer);
+                
+                return {
+                    topic: item.t,
+                    question: item.q,
+                    options: finalOptions,
+                    correctIndex: targetCorrectIndex
+                };
+            });
+
+            document.getElementById('startSection').classList.add('hidden');
+            document.getElementById('examSection').classList.remove('hidden');
+            document.getElementById('examSection').classList.add('animate-fade-in');
+            
+            loadQuestion(0);
+            startTimer();
+        }
+
+        // --- GAME LOGIC ---
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const hrs = Math.floor(secondsElapsed / 3600).toString().padStart(2, '0');
+                const mins = Math.floor((secondsElapsed % 3600) / 60).toString().padStart(2, '0');
+                const secs = (secondsElapsed % 60).toString().padStart(2, '0');
+                document.getElementById('timerDisplay').innerText = `${hrs}:${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function loadQuestion(idx) {
+            currentIdx = idx;
+            const q = currentQuestions[idx];
+
+            document.getElementById('currentQuestionNum').innerText = idx + 1;
+            document.getElementById('progressBar').style.width = `${((idx + 1) / 60) * 100}%`;
+            document.getElementById('questionTopic').innerText = q.topic;
+
+            document.getElementById('questionText').innerText = q.question;
+
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            
+            q.options.forEach((optText, optIdx) => {
+                const isSelected = userAnswers[idx] === optIdx;
+                const btn = document.createElement('div');
+                btn.className = `option-card p-4 rounded-xl border border-slate-600 bg-slate-800 text-slate-300 flex items-center ${isSelected ? 'option-selected' : ''}`;
+                btn.onclick = () => selectAnswer(idx, optIdx);
+                
+                const circle = document.createElement('div');
+                circle.className = `w-6 h-6 rounded-full border-2 mr-4 flex-shrink-0 flex items-center justify-center ${isSelected ? 'border-cyber-accent bg-cyber-accent text-slate-900' : 'border-slate-500'}`;
+                if (isSelected) circle.innerHTML = '<i class="fa-solid fa-check text-xs"></i>';
+                
+                const text = document.createElement('span');
+                text.className = "text-lg";
+                text.innerText = optText;
+
+                btn.appendChild(circle);
+                btn.appendChild(text);
+                container.appendChild(btn);
+            });
+
+            document.getElementById('btnPrev').disabled = idx === 0;
+            if (idx === 59) {
+                document.getElementById('btnNext').classList.add('hidden');
+                document.getElementById('btnSubmit').classList.remove('hidden');
+            } else {
+                document.getElementById('btnNext').classList.remove('hidden');
+                document.getElementById('btnSubmit').classList.add('hidden');
+            }
+        }
+
+        function selectAnswer(qIdx, optIdx) {
+            userAnswers[qIdx] = optIdx;
+            loadQuestion(qIdx); 
+        }
+
+        function nextQuestion() {
+            if (currentIdx < 59) loadQuestion(currentIdx + 1);
+        }
+
+        function prevQuestion() {
+            if (currentIdx > 0) loadQuestion(currentIdx - 1);
+        }
+
+        function markReview() {
+            showCustomAlert("บันทึกช่วยจำ", "ทำเครื่องหมายข้อ " + (currentIdx + 1) + " ไว้ทบทวนเรียบร้อยแล้ว");
+        }
+
+        // --- SUBMISSION & SCORING ---
+        function submitExam() {
+            const answeredCount = Object.keys(userAnswers).length;
+            let msg = "ยืนยันการส่งคำตอบ? เมื่อส่งแล้วจะไม่สามารถแก้ไขได้";
+            
+            if (answeredCount < 60) {
+                msg = `คุณเพิ่งทำข้อสอบไป ${answeredCount} จาก 60 ข้อ\nยืนยันที่จะส่งคำตอบหรือไม่?`;
+            } 
+            
+            showCustomConfirm("ยืนยันการส่งข้อสอบ", msg, () => {
+                finishExamProcess();
+            });
+        }
+
+        function finishExamProcess() {
+            clearInterval(timerInterval);
+
+            // Calculate Score
+            let score = 0;
+            currentQuestions.forEach((q, idx) => {
+                if (userAnswers[idx] === q.correctIndex) {
+                    score++;
+                }
+            });
+
+            const percent = ((score / 60) * 100).toFixed(1);
+            const timeStr = document.getElementById('timerDisplay').innerText;
+
+            document.getElementById('examSection').classList.add('hidden');
+            document.getElementById('resultSection').classList.remove('hidden');
+            
+            animateValue("scoreDisplay", 0, score, 1500);
+            animateValue("percentDisplay", 0, percent, 1500);
+            document.getElementById('timeUsedDisplay').innerText = timeStr;
+
+            sendDataToSheet(score, percent, timeStr);
+        }
+
+        function animateValue(id, start, end, duration) {
+            const obj = document.getElementById(id);
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    obj.innerHTML = end; 
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // --- GOOGLE SHEETS INTEGRATION ---
+        function sendDataToSheet(score, percent, timeUsed) {
+            const statusDiv = document.getElementById('saveStatus');
+            
+            if (GOOGLE_SCRIPT_URL.includes('REPLACE_WITH')) {
+                statusDiv.className = "p-3 rounded-lg bg-yellow-900/30 text-yellow-300 border border-yellow-800 mb-6";
+                statusDiv.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2"></i>ไม่ได้เชื่อมต่อ Google Sheet (Demo Mode)';
+                return;
+            }
+            
+            const data = {
+                timestamp: new Date().toLocaleString('th-TH'),
+                name: studentInfo.name,
+                id: studentInfo.id,
+                group: studentInfo.group,
+                score: score,
+                percent: percent,
+                time: timeUsed
+            };
+
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', 
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                statusDiv.className = "p-3 rounded-lg bg-green-900/30 text-green-300 border border-green-800 mb-6";
+                statusDiv.innerHTML = '<i class="fa-solid fa-check-circle mr-2"></i>บันทึกข้อมูลลง Google Sheet เรียบร้อยแล้ว';
+            })
+            .catch(err => {
+                console.error(err);
+                statusDiv.className = "p-3 rounded-lg bg-red-900/30 text-red-300 border border-red-800 mb-6";
+                statusDiv.innerHTML = '<i class="fa-solid fa-times-circle mr-2"></i>เกิดข้อผิดพลาดในการบันทึก';
+            });
+        }
+    </script>
+</body>
+</html>
